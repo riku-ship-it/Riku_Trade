@@ -237,10 +237,10 @@
   <textarea id="inputText" placeholder="在這裡輸入想要翻譯的文字…"></textarea>
 
   <div class="buttons">
-    <button class="btn btn-en" id="btnEn" onclick="translate('english')">
+    <button class="btn btn-en" id="btnEn" onclick="doTranslate('english')">
       🇺🇸 翻譯成英文
     </button>
-    <button class="btn btn-ja" id="btnJa" onclick="translate('japanese')">
+    <button class="btn btn-ja" id="btnJa" onclick="doTranslate('japanese')">
       🇯🇵 翻譯成日文
     </button>
   </div>
@@ -269,7 +269,7 @@
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkPKMYfY-IPIcOjbWeVvXNtT_1eUU4yU25UMyKuGrhzDgc28K4EQGppZt0Suyug3dqSg/exec';
   // =============================================
 
-  async function translate(language) {
+  async function doTranslate(language) {
     const inputText = document.getElementById('inputText').value.trim();
     const errorMsg = document.getElementById('errorMsg');
     const resultArea = document.getElementById('resultArea');
