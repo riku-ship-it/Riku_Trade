@@ -59,98 +59,6 @@
       gap: 20px;
       align-items: start;
     }
-    @media (max-width: 900px) {
-      .main { grid-template-columns: 1fr; }
-    }
-
-    /* ── 手機響應式（768px 以下）── */
-    @media (max-width: 768px) {
-      body { font-size: 14px; }
-
-      .header { padding: 12px 16px; }
-      .header h1 { font-size: 15px; }
-      .header-sub { display: none; }
-
-      .main { padding: 12px 10px 32px; gap: 14px; }
-
-      /* 按鈕最小高度 48px */
-      .btn { min-height: 48px; font-size: 14px; padding: 10px 16px; }
-      .btn-sm { min-height: 40px; }
-      .btn-submit { min-height: 48px; font-size: 15px; }
-
-      /* Chat 右欄取消 sticky */
-      .chat-wrap { position: static; }
-      .chat-messages { height: 320px; }
-
-      /* ── 表格改卡片 ── */
-      .table-wrap {
-        border: none;
-        border-radius: 0;
-        overflow-x: visible;
-        background: transparent;
-      }
-      table, tbody { display: block; min-width: 0; }
-      thead { display: none; }
-
-      tbody tr {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px 14px;
-        background: var(--bg3);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 14px 14px 14px 14px;
-        margin-bottom: 10px;
-        position: relative;
-      }
-      /* 隱藏序號欄 */
-      tbody td:nth-child(1) { display: none; }
-      /* 刪除按鈕移至右上角 */
-      tbody td:last-child {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        grid-column: unset;
-        padding: 0;
-        border: none;
-      }
-
-      tbody td {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        border-bottom: none !important;
-        padding: 0 !important;
-        vertical-align: top;
-      }
-      /* 欄位標籤（偽元素） */
-      tbody td::before {
-        font-size: 10px;
-        color: var(--muted);
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-      }
-      tbody td:nth-child(2)::before  { content: "日期"; }
-      tbody td:nth-child(3)::before  { content: "股票代號"; }
-      tbody td:nth-child(4)::before  { content: "方向"; }
-      tbody td:nth-child(5)::before  { content: "進場時間"; }
-      tbody td:nth-child(6)::before  { content: "出場時間"; }
-      tbody td:nth-child(7)::before  { content: "進場價"; }
-      tbody td:nth-child(8)::before  { content: "出場價"; }
-      tbody td:nth-child(9)::before  { content: "張數"; }
-      tbody td:nth-child(10)::before { content: "毛損益"; }
-      tbody td:nth-child(11)::before { content: "手費+稅"; }
-      tbody td:nth-child(12)::before { content: "淨損益"; }
-      tbody td:nth-child(13)::before { content: "策略代號"; }
-
-      .cell-input  { width: 100% !important; font-size: 14px; }
-      .cell-select { width: 100% !important; font-size: 14px; }
-      .cell-auto   { font-size: 14px; min-width: 0; text-align: left; }
-
-      /* 報告統計格 */
-      .stats-row { grid-template-columns: 1fr 1fr; }
-    }
 
     /* ── 通用卡片 ── */
     .card {
@@ -175,14 +83,17 @@
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      padding: 8px 16px;
+      padding: 10px 18px;
       border: none;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      min-height: 44px;
       transition: opacity .15s, transform .1s;
+      white-space: nowrap;
     }
     .btn:active   { transform: scale(.97); }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -192,16 +103,63 @@
     .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
     .btn-danger   { background: #3d1a1a; color: var(--loss); border: 1px solid #5a2020; }
     .btn-danger:hover { background: #5a2020; }
-    .btn-sm       { padding: 4px 10px; font-size: 12px; }
+    .btn-sm       { padding: 5px 12px; font-size: 13px; min-height: 34px; }
     .btn-submit   {
-      width: 100%; padding: 13px; font-size: 15px; font-weight: 700;
+      width: 100%; padding: 14px; font-size: 15px; font-weight: 700;
       background: linear-gradient(135deg, var(--accent2), #0d419d);
       color: #fff; border: none; border-radius: var(--radius);
-      cursor: pointer; transition: opacity .2s, transform .1s;
+      cursor: pointer; min-height: 52px;
+      transition: opacity .2s, transform .1s;
       display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .btn-submit:hover:not(:disabled) { opacity: .9; }
     .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── 從試算表載入區塊 ── */
+    .load-section {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .load-section-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .load-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .date-picker {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      padding: 8px 12px;
+      outline: none;
+      min-height: 44px;
+      cursor: pointer;
+      transition: border-color .15s;
+      /* 修正 Safari/Chrome 日期選擇器深色主題 */
+      color-scheme: dark;
+    }
+    .date-picker:focus { border-color: var(--accent); }
+    .load-status {
+      font-size: 13px;
+      color: var(--muted);
+      flex: 1;
+      min-width: 120px;
+    }
 
     /* ── 交易輸入區 ── */
     .trade-toolbar {
@@ -209,9 +167,10 @@
       gap: 8px;
       margin-bottom: 12px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
-    /* ── 表格 ── */
+    /* ── 桌面版表格 ── */
     .table-wrap {
       overflow-x: auto;
       border: 1px solid var(--border);
@@ -255,10 +214,7 @@
       outline: none;
       transition: border-color .15s, background .15s;
     }
-    .cell-input:focus {
-      border-color: var(--accent);
-      background: var(--bg);
-    }
+    .cell-input:focus { border-color: var(--accent); background: var(--bg); }
     .cell-select {
       background: var(--bg3);
       border: 1px solid var(--border);
@@ -271,8 +227,6 @@
       cursor: pointer;
     }
     .cell-select:focus { border-color: var(--accent); }
-
-    /* 自動計算欄位（唯讀） */
     .cell-auto {
       display: block;
       text-align: center;
@@ -283,8 +237,8 @@
       min-width: 70px;
     }
     .cell-auto.profit { color: var(--profit); }
-    .cell-auto.loss   { color: var(--loss); }
-    .cell-auto.neutral{ color: var(--muted); }
+    .cell-auto.loss   { color: var(--loss);   }
+    .cell-auto.neutral{ color: var(--muted);  }
 
     /* ── 備註欄 ── */
     .notes-wrap { margin-top: 14px; }
@@ -295,7 +249,7 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text);
-      font-size: 13px;
+      font-size: 14px;
       padding: 10px 12px;
       resize: vertical;
       outline: none;
@@ -311,7 +265,6 @@
 
     /* ── 報告區 ── */
     #reportArea { display: none; margin-top: 20px; }
-
     .stats-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -325,11 +278,7 @@
       padding: 12px;
       text-align: center;
     }
-    .stat-box .val {
-      font-size: 22px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
+    .stat-box .val { font-size: 22px; font-weight: 700; line-height: 1.2; }
     .stat-box .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .stat-box.profit .val { color: var(--profit); }
     .stat-box.loss   .val { color: var(--loss);   }
@@ -337,190 +286,175 @@
 
     /* 評分條 */
     .score-section { margin-bottom: 16px; }
-    .score-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
+    .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
     .score-label { width: 90px; font-size: 12px; color: var(--muted); flex-shrink: 0; }
-    .score-bar-wrap {
-      flex: 1;
-      background: var(--bg3);
-      border-radius: 999px;
-      height: 10px;
-      overflow: hidden;
-    }
-    .score-bar {
-      height: 100%;
-      border-radius: 999px;
-      transition: width 1.2s cubic-bezier(.4,0,.2,1);
-      width: 0%;
-    }
+    .score-bar-wrap { flex: 1; background: var(--bg3); border-radius: 999px; height: 10px; overflow: hidden; }
+    .score-bar { height: 100%; border-radius: 999px; transition: width 1.2s cubic-bezier(.4,0,.2,1); width: 0%; }
     .score-val { width: 36px; text-align: right; font-size: 13px; font-weight: 700; }
 
     /* 報告文字區塊 */
-    .report-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    @media (max-width: 600px) { .report-grid { grid-template-columns: 1fr; } }
-    .report-box {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-    }
-    .report-box .rb-title {
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 600;
-      letter-spacing: .5px;
-      margin-bottom: 6px;
-    }
-    .report-box .rb-text { font-size: 13px; line-height: 1.7; }
-
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .report-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+    .report-box .rb-title { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .5px; margin-bottom: 6px; }
+    .report-box .rb-text  { font-size: 13px; line-height: 1.7; }
     .full-report {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-size: 13px;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 16px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; word-break: break-word;
     }
 
     /* ── AI 對話框 ── */
     .chat-wrap { position: sticky; top: 70px; }
     .chat-messages {
-      height: 420px;
-      overflow-y: auto;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: var(--bg);
+      height: 420px; overflow-y: auto; padding: 14px;
+      display: flex; flex-direction: column; gap: 10px; background: var(--bg);
     }
     .chat-messages::-webkit-scrollbar { width: 4px; }
     .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .msg {
-      max-width: 85%;
-      padding: 10px 13px;
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.65;
-      word-break: break-word;
-      white-space: pre-wrap;
-    }
-    .msg.user {
-      background: var(--accent2);
-      color: #fff;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    .msg.ai {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text);
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-    .msg.system {
-      background: transparent;
-      color: var(--muted);
-      font-size: 12px;
-      align-self: center;
-      text-align: center;
-      font-style: italic;
-    }
-
-    /* 範例問題提示 */
-    .chat-hints {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 0 14px 10px;
-    }
-    .hint-btn {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: left;
-      cursor: pointer;
-      transition: border-color .15s, color .15s;
-    }
+    .msg { max-width: 85%; padding: 10px 13px; border-radius: 12px; font-size: 14px; line-height: 1.65; word-break: break-word; white-space: pre-wrap; }
+    .msg.user   { background: var(--accent2); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg.ai     { background: var(--bg3); border: 1px solid var(--border); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg.system { background: transparent; color: var(--muted); font-size: 12px; align-self: center; text-align: center; font-style: italic; }
+    .chat-hints { display: flex; flex-direction: column; gap: 6px; padding: 0 14px 10px; }
+    .hint-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--muted); font-size: 13px; text-align: left; cursor: pointer; transition: border-color .15s, color .15s; min-height: 44px; }
     .hint-btn:hover { border-color: var(--accent); color: var(--text); }
-
-    .chat-input-row {
-      display: flex;
-      gap: 8px;
-      padding: 12px 14px;
-      border-top: 1px solid var(--border);
-      background: var(--bg2);
-    }
+    .chat-input-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border); background: var(--bg2); }
     .chat-input {
-      flex: 1;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 13px;
-      padding: 8px 12px;
-      outline: none;
-      resize: none;
-      height: 40px;
-      min-height: 40px;
-      max-height: 120px;
-      line-height: 1.5;
-      font-family: inherit;
-      transition: border-color .15s;
-      overflow-y: hidden;
+      flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font-size: 14px; padding: 8px 12px; outline: none;
+      resize: none; height: 44px; min-height: 44px; max-height: 120px; line-height: 1.5;
+      font-family: inherit; transition: border-color .15s; overflow-y: hidden;
     }
     .chat-input:focus { border-color: var(--accent); }
 
     /* ── 通用工具 ── */
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .tag-long  { background: #1a3a1a; color: var(--profit); }
-    .tag-short { background: #3a1a1a; color: var(--loss);   }
-
-    .spinner {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,.2);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .error-banner {
-      background: #3d1a1a;
-      border: 1px solid #5a2020;
-      border-radius: 8px;
-      color: var(--loss);
-      padding: 10px 14px;
-      font-size: 13px;
-      margin-top: 12px;
-      display: none;
-    }
+    .error-banner { background: #3d1a1a; border: 1px solid #5a2020; border-radius: 8px; color: var(--loss); padding: 10px 14px; font-size: 14px; margin-top: 12px; display: none; }
 
     /* ── 捲軸美化 ── */
     ::-webkit-scrollbar       { width: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg2); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+
+    /* ════════════════════════════════════════════════════════
+       手機響應式（768px 以下）
+       ════════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+
+      /* 頁首 */
+      .header { padding: 12px 16px; }
+      .header h1  { font-size: 15px; }
+      .header-sub { display: none; }
+
+      /* 主容器：單欄 */
+      .main { grid-template-columns: 1fr; padding: 12px 12px 48px; gap: 14px; }
+
+      /* card padding 縮減 */
+      .card-body { padding: 14px 12px; }
+      .card-header { padding: 10px 14px; font-size: 13px; }
+
+      /* 工具列按鈕 */
+      .trade-toolbar .btn { flex: 1; min-height: 48px; font-size: 14px; }
+
+      /* 載入區塊 */
+      .load-row { flex-direction: column; align-items: stretch; }
+      .load-row .date-picker { width: 100%; }
+      .load-row .btn { width: 100%; min-height: 48px; }
+      .load-status { text-align: center; }
+
+      /* ── 表格 → 卡片 ── */
+      .table-wrap { border: none; overflow-x: visible; }
+      table       { min-width: unset; width: 100%; }
+      thead       { display: none; }
+
+      /* 每筆交易 = 一張卡 */
+      tbody tr {
+        display: block;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 12px 8px;
+        margin-bottom: 12px;
+        position: relative;
+      }
+      tbody tr:hover { background: var(--bg3); }
+
+      /* 每個欄位：label + 輸入框（水平排列） */
+      tbody td {
+        display: flex;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(48,54,61,0.5);
+        min-height: 44px;
+        font-size: 14px;
+        border-right: none;
+        border-left: none;
+        border-top: none;
+      }
+      tbody td:last-child { border-bottom: none; padding-bottom: 4px; }
+
+      /* label（由 data-label 取得） */
+      tbody td::before {
+        content: attr(data-label);
+        min-width: 68px;
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 600;
+        letter-spacing: .4px;
+        flex-shrink: 0;
+      }
+
+      /* 序號欄 */
+      tbody td.td-idx {
+        border-bottom: 1px solid var(--border);
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 13px;
+        padding-right: 44px; /* 留給刪除按鈕 */
+        min-height: 36px;
+      }
+      tbody td.td-idx::before { content: none; }
+
+      /* 刪除按鈕：絕對定位右上角 */
+      tbody td.td-del {
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        min-height: unset;
+        padding: 0;
+        border: none;
+        background: transparent;
+      }
+      tbody td.td-del::before { content: none; }
+
+      /* 輸入框 */
+      tbody td .cell-input  { width: 100% !important; font-size: 14px; min-height: 36px; padding: 6px 8px; }
+      tbody td .cell-select { font-size: 14px; min-height: 36px; padding: 6px 8px; }
+      tbody td .cell-auto   { font-size: 14px; min-width: unset; text-align: left; }
+
+      /* 報告統計 2 欄 */
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stat-box .val { font-size: 18px; }
+
+      /* 評分條 label */
+      .score-label { width: 72px; font-size: 11px; }
+
+      /* 報告 grid 單欄 */
+      .report-grid { grid-template-columns: 1fr; }
+
+      /* chat 不 sticky，高度縮短 */
+      .chat-wrap { position: static; }
+      .chat-messages { height: 280px; }
+      .msg { font-size: 14px; }
+    }
+
+    /* ── 超小螢幕（400px） ── */
+    @media (max-width: 400px) {
+      .header h1  { font-size: 14px; }
+      .main       { padding: 8px 8px 40px; }
+      tbody td::before { min-width: 58px; }
+    }
   </style>
 </head>
 <body>
@@ -542,53 +476,63 @@
     <div class="card">
       <div class="card-header">
         ✏️ 今日交易紀錄
-        <span style="margin-left:auto;font-weight:400;color:var(--muted);font-size:12px;">
-          手續費按 0.1425%（雙邊），交易稅按 0.15%（當沖減半）自動計算
+        <span style="margin-left:auto;font-weight:400;color:var(--muted);font-size:11px;">
+          手續費 0.1425%（雙邊），交易稅 0.15%（當沖減半）自動計算
         </span>
       </div>
       <div class="card-body">
 
-        <!-- 工具列 -->
+        <!-- ① 從試算表讀取歷史資料 -->
+        <div class="load-section">
+          <div class="load-section-label">📥 從試算表讀取歷史資料（輸入日期自動帶入）</div>
+          <div class="load-row">
+            <input type="date" id="loadDate" class="date-picker" />
+            <button class="btn btn-ghost" id="loadBtn" onclick="loadFromSheet()">
+              📂 載入該日交易
+            </button>
+            <span class="load-status" id="loadStatus"></span>
+          </div>
+        </div>
+
+        <!-- ② 工具列 -->
         <div class="trade-toolbar">
           <button class="btn btn-accent" onclick="addRow()">＋ 新增一筆</button>
-          <button class="btn btn-ghost" onclick="fillTodayDate()">📅 填入今日日期</button>
+          <button class="btn btn-ghost" onclick="fillTodayDate()">📅 填今日日期</button>
           <button class="btn btn-danger btn-sm" onclick="clearAllRows()" style="margin-left:auto">🗑 清空</button>
         </div>
 
-        <!-- 交易表格 -->
+        <!-- ③ 交易表格（桌面）→ 手機自動變卡片 -->
         <div class="table-wrap">
           <table id="tradeTable">
             <thead>
               <tr>
-                <th style="width:36px">#</th>
-                <th style="min-width:65px">日期</th>
-                <th style="min-width:75px">股票代號</th>
-                <th style="width:70px">方向</th>
-                <th style="width:65px">進場時間</th>
-                <th style="width:65px">出場時間</th>
-                <th style="width:70px">進場價</th>
-                <th style="width:70px">出場價</th>
-                <th style="width:55px">張數</th>
-                <th style="min-width:80px">毛損益</th>
-                <th style="min-width:80px">手費+稅</th>
-                <th style="min-width:85px">淨損益</th>
-                <th style="min-width:65px">策略代號</th>
-                <th style="width:36px"></th>
+                <th style="width:32px">#</th>
+                <th style="min-width:72px">日期</th>
+                <th style="min-width:72px">股票代號</th>
+                <th style="width:68px">方向</th>
+                <th style="width:62px">進場時間</th>
+                <th style="width:62px">出場時間</th>
+                <th style="width:68px">進場價</th>
+                <th style="width:68px">出場價</th>
+                <th style="width:50px">張數</th>
+                <th style="min-width:76px">毛損益</th>
+                <th style="min-width:76px">手費+稅</th>
+                <th style="min-width:82px">淨損益</th>
+                <th style="min-width:60px">策略代號</th>
+                <th style="width:32px"></th>
               </tr>
             </thead>
-            <tbody id="tradeBody">
-              <!-- 由 JS 動態產生 -->
-            </tbody>
+            <tbody id="tradeBody"></tbody>
           </table>
         </div>
 
-        <!-- 備註欄 -->
+        <!-- ④ 備註欄 -->
         <div class="notes-wrap">
-          <div class="notes-label">📝 今日備註（可填入盤前計畫、盤後心得、特殊市況等，AI 會納入分析）</div>
+          <div class="notes-label">📝 今日備註（盤前計畫、盤後心得、特殊市況，AI 會納入分析）</div>
           <textarea class="notes" id="notes" placeholder="選填：今日操作心得、情緒狀態、特殊原因…"></textarea>
         </div>
 
-        <!-- 送出按鈕 -->
+        <!-- ⑤ 送出按鈕 -->
         <div class="submit-wrap">
           <button class="btn-submit" id="submitBtn" onclick="submitTrades()">
             🤖 送出並取得 AI 分析報告
@@ -607,7 +551,6 @@
         <div class="card-header">🧠 AI 分析報告</div>
         <div class="card-body">
 
-          <!-- 統計數字 -->
           <div class="stats-row">
             <div class="stat-box">
               <div class="val" id="rTotal">—</div>
@@ -627,10 +570,9 @@
             </div>
           </div>
 
-          <!-- 評分條 -->
           <div class="score-section">
             <div class="score-row">
-              <span class="score-label">😌 情緒穩定度</span>
+              <span class="score-label">😌 情緒穩定</span>
               <div class="score-bar-wrap">
                 <div class="score-bar" id="emotionBar" style="background:var(--profit)"></div>
               </div>
@@ -645,7 +587,6 @@
             </div>
           </div>
 
-          <!-- 四維度分析 -->
           <div class="report-grid">
             <div class="report-box">
               <div class="rb-title">😌 情緒狀態</div>
@@ -665,14 +606,13 @@
             </div>
           </div>
 
-          <!-- 完整報告 -->
           <div class="card-header" style="border-radius:8px 8px 0 0;margin-bottom:0">
             📄 完整分析報告
           </div>
           <div class="full-report" id="rFull">—</div>
 
-        </div><!-- /card-body -->
-      </div><!-- /card -->
+        </div>
+      </div>
     </div><!-- /reportArea -->
 
   </div><!-- /left-col -->
@@ -682,19 +622,16 @@
     <div class="card chat-wrap">
       <div class="card-header">💬 AI 交易顧問對話</div>
 
-      <!-- 對話記錄 -->
       <div class="chat-messages" id="chatMessages">
         <div class="msg system">歡迎！你可以詢問我任何台股當沖相關問題 🎯</div>
       </div>
 
-      <!-- 範例問題 -->
       <div class="chat-hints" id="chatHints">
         <button class="hint-btn" onclick="sendHint(this)">📉 我今天連續虧損三筆，應該怎麼調整心態？</button>
         <button class="hint-btn" onclick="sendHint(this)">⏰ 當沖的最佳進出場時段是哪些？</button>
         <button class="hint-btn" onclick="sendHint(this)">🔒 如何設定合理的停損點避免大虧？</button>
       </div>
 
-      <!-- 輸入區 -->
       <div class="chat-input-row">
         <textarea
           class="chat-input"
@@ -702,7 +639,8 @@
           placeholder="輸入問題，按 Enter 送出（Shift+Enter 換行）"
           rows="1"
         ></textarea>
-        <button class="btn btn-accent" id="chatSendBtn" onclick="sendChat()" style="height:40px;align-self:flex-end">
+        <button class="btn btn-accent" id="chatSendBtn" onclick="sendChat()"
+                style="height:44px;width:44px;padding:0;align-self:flex-end;flex-shrink:0">
           ➤
         </button>
       </div>
@@ -718,203 +656,267 @@
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkPKMYfY-IPIcOjbWeVvXNtT_1eUU4yU25UMyKuGrhzDgc28K4EQGppZt0Suyug3dqSg/exec';
 // ============================================================
 
-// ── 對話歷史（用於多輪 AI 對話）──
 let chatHistory = [];
+const FEE_RATE  = 0.001425;  // 手續費雙邊費率（可依折扣調整）
+const TAX_RATE  = 0.0015;    // 交易稅（當沖減半）
 
-// ── 歷史交易紀錄（從 Sheet 載入，AI 對話時一併傳送）──
-let historyData = null;
-
-// ── 費率常數（台股當沖）──
-const FEE_RATE = 0.001425;   // 手續費（雙邊），可依折扣調整
-const TAX_RATE = 0.0015;     // 交易稅（當沖減半）
-
-// ============================================================
-// 交易表格管理
-// ============================================================
-
-/** 取得今日日期字串 yyyy/MM/dd */
+// ── 取得今日日期字串 yyyy/MM/dd ──
 function todayStr() {
   const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}/${m}/${day}`;
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
 }
 
-/** 新增一行空白交易 */
-function addRow(date) {
+// ============================================================
+// 新增一行（可選擇帶入預填資料 prefill）
+// prefill 格式與後端回傳的 trade 物件相同
+// ============================================================
+function addRow(prefill) {
   const tbody = document.getElementById('tradeBody');
   const idx   = tbody.rows.length + 1;
+  const p     = prefill || {};
   const row   = document.createElement('tr');
   row.dataset.idx = idx;
+
+  // 判斷方向預選
+  const dirLong  = (p.direction || '多') === '多' ? 'selected' : '';
+  const dirShort = (p.direction || '')   === '空' ? 'selected' : '';
+
+  // 預填損益顯示
+  function fmtAuto(val) {
+    if (val == null || val === '') return '—';
+    const n = Number(val);
+    return (n >= 0 ? '+' : '') + n.toLocaleString();
+  }
+  function autoClass(val) {
+    if (val == null || val === '') return 'cell-auto neutral';
+    return 'cell-auto ' + (Number(val) > 0 ? 'profit' : Number(val) < 0 ? 'loss' : 'neutral');
+  }
+
   row.innerHTML = `
-    <td style="text-align:center;color:var(--muted);font-size:12px">${idx}</td>
-    <td><input class="cell-input" style="width:88px" type="text" placeholder="yyyy/MM/dd"
-        value="${date || ''}" oninput="recalc(this)"></td>
-    <td><input class="cell-input" style="width:80px" type="text" placeholder="如 2330"></td>
-    <td>
+    <td class="td-idx">${idx}</td>
+    <td data-label="日期">
+      <input class="cell-input" style="width:90px" type="text" placeholder="yyyy/MM/dd"
+        value="${p.date || ''}" oninput="recalc(this)">
+    </td>
+    <td data-label="股票代號">
+      <input class="cell-input" style="width:80px" type="text" placeholder="如 2330"
+        value="${p.stock || ''}">
+    </td>
+    <td data-label="方向">
       <select class="cell-select" onchange="recalc(this)">
-        <option value="多">多（做多）</option>
-        <option value="空">空（放空）</option>
+        <option value="多" ${dirLong}>多（做多）</option>
+        <option value="空" ${dirShort}>空（放空）</option>
       </select>
     </td>
-    <td><input class="cell-input" style="width:60px" type="text" placeholder="09:05" oninput="recalc(this)"></td>
-    <td><input class="cell-input" style="width:60px" type="text" placeholder="10:30" oninput="recalc(this)"></td>
-    <td><input class="cell-input" style="width:65px" type="number" step="0.01" placeholder="進場價" oninput="recalc(this)"></td>
-    <td><input class="cell-input" style="width:65px" type="number" step="0.01" placeholder="出場價" oninput="recalc(this)"></td>
-    <td><input class="cell-input" style="width:48px" type="number" min="1" placeholder="1" value="1" oninput="recalc(this)"></td>
-    <td><span class="cell-auto neutral" id="gross_${idx}">—</span></td>
-    <td><span class="cell-auto neutral" id="fee_${idx}">—</span></td>
-    <td><span class="cell-auto neutral" id="net_${idx}">—</span></td>
-    <td><input class="cell-input" style="width:60px" type="text" placeholder="S01"></td>
-    <td><button class="btn btn-danger btn-sm" onclick="removeRow(this)" title="刪除此行">✕</button></td>
+    <td data-label="進場時間">
+      <input class="cell-input" style="width:60px" type="text" placeholder="09:05"
+        value="${p.entry_time || ''}" oninput="recalc(this)">
+    </td>
+    <td data-label="出場時間">
+      <input class="cell-input" style="width:60px" type="text" placeholder="10:30"
+        value="${p.exit_time || ''}" oninput="recalc(this)">
+    </td>
+    <td data-label="進場價">
+      <input class="cell-input" style="width:65px" type="number" step="0.01" placeholder="進場價"
+        value="${p.entry_price || ''}" oninput="recalc(this)">
+    </td>
+    <td data-label="出場價">
+      <input class="cell-input" style="width:65px" type="number" step="0.01" placeholder="出場價"
+        value="${p.exit_price || ''}" oninput="recalc(this)">
+    </td>
+    <td data-label="張數">
+      <input class="cell-input" style="width:48px" type="number" min="1" placeholder="1"
+        value="${p.shares || 1}" oninput="recalc(this)">
+    </td>
+    <td data-label="毛損益">
+      <span class="${autoClass(p.gross_pnl)}" id="gross_${idx}">${fmtAuto(p.gross_pnl)}</span>
+    </td>
+    <td data-label="手費+稅">
+      <span class="${p.tax_fee != null ? 'cell-auto neutral' : 'cell-auto neutral'}" id="fee_${idx}">
+        ${p.tax_fee != null && p.tax_fee !== '' ? Number(p.tax_fee).toLocaleString() : '—'}
+      </span>
+    </td>
+    <td data-label="淨損益">
+      <span class="${autoClass(p.net_pnl)}" id="net_${idx}">${fmtAuto(p.net_pnl)}</span>
+    </td>
+    <td data-label="策略代號">
+      <input class="cell-input" style="width:60px" type="text" placeholder="S01"
+        value="${p.strategy_id || ''}">
+    </td>
+    <td class="td-del">
+      <button class="btn btn-danger btn-sm" onclick="removeRow(this)" title="刪除">✕</button>
+    </td>
   `;
   tbody.appendChild(row);
-  // 讓序號欄追蹤更新
-  row.querySelector('input[placeholder="09:05"]').addEventListener('change', () => recalc(row));
 }
 
-/** 刪除一行 */
+// ── 刪除一行並重新編號 ──
 function removeRow(btn) {
-  const row = btn.closest('tr');
-  row.remove();
-  // 重新編號
-  const rows = document.querySelectorAll('#tradeBody tr');
-  rows.forEach((r, i) => { r.cells[0].textContent = i + 1; });
+  btn.closest('tr').remove();
+  document.querySelectorAll('#tradeBody tr').forEach((r, i) => {
+    r.dataset.idx = i + 1;
+    r.cells[0].textContent = i + 1;
+  });
 }
 
-/** 清空所有行 */
+// ── 清空所有行 ──
 function clearAllRows() {
   if (!confirm('確定要清空所有交易紀錄嗎？')) return;
   document.getElementById('tradeBody').innerHTML = '';
 }
 
-/** 填入今日日期到所有空白日期欄 */
+// ── 填入今日日期到所有空白日期欄 ──
 function fillTodayDate() {
   const today = todayStr();
   document.querySelectorAll('#tradeBody tr').forEach(row => {
-    const dateInput = row.cells[1].querySelector('input');
-    if (!dateInput.value) dateInput.value = today;
+    const inp = row.cells[1].querySelector('input');
+    if (inp && !inp.value) inp.value = today;
   });
 }
 
-/** 自動計算毛損益、手費+稅、淨損益 */
+// ── 自動計算損益 ──
 function recalc(el) {
   const row = el.closest('tr');
   if (!row) return;
-  const idx = row.dataset.idx;
+  const idx  = row.dataset.idx;
+  const cells = row.cells;
 
-  const cells     = row.cells;
-  const direction = cells[3].querySelector('select').value;
-  const entryP    = parseFloat(cells[6].querySelector('input').value) || 0;
-  const exitP     = parseFloat(cells[7].querySelector('input').value) || 0;
-  const shares    = parseInt(cells[8].querySelector('input').value)   || 0;
+  const dir    = cells[3].querySelector('select').value;
+  const entryP = parseFloat(cells[6].querySelector('input').value) || 0;
+  const exitP  = parseFloat(cells[7].querySelector('input').value) || 0;
+  const shares = parseInt(cells[8].querySelector('input').value)   || 0;
 
   if (!entryP || !exitP || !shares) {
-    setAutoCell(idx, 'gross', null);
-    setAutoCell(idx, 'fee',   null);
-    setAutoCell(idx, 'net',   null);
+    ['gross','fee','net'].forEach(t => setAutoCell(idx, t, null));
     return;
   }
 
   const units    = shares * 1000;
-  const grossRaw = direction === '多'
-    ? (exitP - entryP) * units
-    : (entryP - exitP) * units;
-
-  // 手續費（買進+賣出各一次）+ 交易稅（以賣出金額計）
-  const fee = Math.round((entryP + exitP) * units * FEE_RATE);
-  const tax = Math.round(exitP           * units * TAX_RATE);
-  const totalFee = fee + tax;
-  const netPnl   = Math.round(grossRaw) - totalFee;
+  const grossRaw = dir === '多' ? (exitP - entryP) * units : (entryP - exitP) * units;
+  const fee      = Math.round((entryP + exitP) * units * FEE_RATE);
+  const tax      = Math.round(exitP * units * TAX_RATE);
+  const netPnl   = Math.round(grossRaw) - fee - tax;
 
   setAutoCell(idx, 'gross', Math.round(grossRaw));
-  setAutoCell(idx, 'fee',   totalFee);
+  setAutoCell(idx, 'fee',   fee + tax);
   setAutoCell(idx, 'net',   netPnl);
 }
 
 function setAutoCell(idx, type, val) {
-  const map = { gross: `gross_${idx}`, fee: `fee_${idx}`, net: `net_${idx}` };
-  const el  = document.getElementById(map[type]);
+  const id = { gross: `gross_${idx}`, fee: `fee_${idx}`, net: `net_${idx}` }[type];
+  const el = document.getElementById(id);
   if (!el) return;
   if (val === null) {
-    el.textContent = '—';
-    el.className = 'cell-auto neutral';
-    return;
+    el.textContent = '—'; el.className = 'cell-auto neutral'; return;
   }
   el.textContent = (val >= 0 ? '+' : '') + val.toLocaleString();
   el.className   = 'cell-auto ' + (val > 0 ? 'profit' : val < 0 ? 'loss' : 'neutral');
+  // 手費固定顯示絕對值
+  if (type === 'fee') { el.textContent = val.toLocaleString(); }
 }
 
-// ============================================================
-// 載入歷史交易紀錄（頁面啟動時自動執行）
-// ============================================================
-async function loadHistory() {
-  if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') return;
-  try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'get_history' })
-    });
-    const data = await res.json();
-    if (data.success && Array.isArray(data.history)) {
-      historyData = data.history;
-      if (historyData.length > 0) {
-        appendMsg('system', `📂 已載入 ${historyData.length} 筆歷史交易紀錄，AI 可直接分析`);
-      }
-    }
-  } catch (e) {
-    // 靜默失敗，不影響主功能
-    console.warn('載入歷史紀錄失敗：', e.message);
-  }
-}
-
-// 頁面載入時預設一行
+// ── 頁面初始化 ──
 window.addEventListener('DOMContentLoaded', () => {
-  addRow(todayStr());
-  // 自動調整 chat textarea 高度
-  const chatInput = document.getElementById('chatInput');
-  chatInput.addEventListener('input', () => {
-    chatInput.style.height = '40px';
-    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+  addRow();
+  // 日期預設今天
+  const ld = document.getElementById('loadDate');
+  const now = new Date();
+  ld.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+  // chat textarea 自動展高
+  const ci = document.getElementById('chatInput');
+  ci.addEventListener('input', () => {
+    ci.style.height = '44px';
+    ci.style.height = Math.min(ci.scrollHeight, 120) + 'px';
   });
-  chatInput.addEventListener('keydown', e => {
+  ci.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
   });
-  // 自動載入歷史紀錄
-  loadHistory();
 });
 
 // ============================================================
-// 送出交易 + 取得 AI 報告
+// 從 Google Sheet 讀取指定日期的交易資料
+// ============================================================
+async function loadFromSheet() {
+  const dateInput  = document.getElementById('loadDate');
+  const statusEl   = document.getElementById('loadStatus');
+  const rawDate    = dateInput.value;  // yyyy-mm-dd
+
+  if (!rawDate) { showError('請先選擇要載入的交易日期'); return; }
+  if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+    showError('請先在 Index.html 設定 GAS_URL');
+    return;
+  }
+
+  // 轉為 yyyy/MM/dd 格式（符合 Sheet 儲存格式）
+  const formattedDate = rawDate.replace(/-/g, '/');
+
+  const loadBtn = document.getElementById('loadBtn');
+  loadBtn.disabled  = true;
+  statusEl.textContent = '⏳ 載入中…';
+  statusEl.style.color = 'var(--muted)';
+  showError('');
+
+  try {
+    const res  = await fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify({ action: 'loadFromSheet', date: formattedDate })
+    });
+    const data = await res.json();
+
+    if (!data.success) throw new Error(data.error || '讀取失敗');
+
+    const trades = data.trades || [];
+    if (trades.length === 0) {
+      statusEl.textContent = `😕 ${formattedDate} 無交易紀錄`;
+      statusEl.style.color = 'var(--warn)';
+      return;
+    }
+
+    // 清空現有資料並填入
+    document.getElementById('tradeBody').innerHTML = '';
+    trades.forEach(t => addRow(t));
+
+    statusEl.textContent = `✅ 已載入 ${trades.length} 筆（${formattedDate}）`;
+    statusEl.style.color = 'var(--profit)';
+
+    // 把日期也填進備註提示
+    document.getElementById('notes').placeholder = `選填：${formattedDate} 操作心得、情緒狀態…`;
+
+  } catch (err) {
+    statusEl.textContent = '';
+    showError('載入失敗：' + err.message);
+  } finally {
+    loadBtn.disabled = false;
+  }
+}
+
+// ============================================================
+// 送出交易取得 AI 報告
 // ============================================================
 async function submitTrades() {
   showError('');
-
-  // 收集表格資料
   const rows   = document.querySelectorAll('#tradeBody tr');
   const trades = [];
 
   for (let i = 0; i < rows.length; i++) {
-    const cells = rows[i].cells;
-    const date    = cells[1].querySelector('input').value.trim();
-    const stock   = cells[2].querySelector('input').value.trim();
-    const dir     = cells[3].querySelector('select').value;
-    const entryT  = cells[4].querySelector('input').value.trim();
-    const exitT   = cells[5].querySelector('input').value.trim();
-    const entryP  = parseFloat(cells[6].querySelector('input').value);
-    const exitP   = parseFloat(cells[7].querySelector('input').value);
-    const shares  = parseInt(cells[8].querySelector('input').value);
-    const stratId = cells[12].querySelector('input').value.trim();
+    const cells  = rows[i].cells;
+    const date   = cells[1].querySelector('input').value.trim();
+    const stock  = cells[2].querySelector('input').value.trim();
+    const dir    = cells[3].querySelector('select').value;
+    const entryT = cells[4].querySelector('input').value.trim();
+    const exitT  = cells[5].querySelector('input').value.trim();
+    const entryP = parseFloat(cells[6].querySelector('input').value);
+    const exitP  = parseFloat(cells[7].querySelector('input').value);
+    const shares = parseInt(cells[8].querySelector('input').value);
+    const strat  = cells[12].querySelector('input').value.trim();
 
-    // 基本驗證
     if (!date || !stock || !entryP || !exitP || !shares) {
-      showError(`第 ${i + 1} 筆資料不完整，請確認日期、股票代號、進出場價、張數均已填寫`);
+      showError(`第 ${i+1} 筆不完整，請確認日期、股票代號、進出場價、張數均已填寫`);
       return;
     }
 
-    // 重新計算損益（確保精確）
     const units    = shares * 1000;
     const grossRaw = dir === '多' ? (exitP - entryP) * units : (entryP - exitP) * units;
     const fee      = Math.round((entryP + exitP) * units * FEE_RATE);
@@ -926,105 +928,75 @@ async function submitTrades() {
       entry_time: entryT, exit_time: exitT,
       entry_price: entryP, exit_price: exitP,
       shares,
-      gross_pnl:  Math.round(grossRaw),
-      tax_fee:    fee + tax,
-      net_pnl:    netPnl,
-      strategy_id: stratId || ''
+      gross_pnl:   Math.round(grossRaw),
+      tax_fee:     fee + tax,
+      net_pnl:     netPnl,
+      strategy_id: strat || ''
     });
   }
 
-  if (trades.length === 0) {
-    showError('請至少新增一筆交易後再送出');
-    return;
-  }
-
-  // 確認 GAS URL 已設定
+  if (trades.length === 0) { showError('請至少新增一筆交易再送出'); return; }
   if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
-    showError('請先在 Index.html 的第一行 JavaScript 中填入你的 GAS Web App URL（const GAS_URL = \'...\')');
+    showError('請先設定 GAS_URL');
     return;
   }
 
-  // 更新 UI 為載入狀態
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> AI 分析中，請稍候…';
 
   try {
-    const payload = {
-      action: 'analyze',
-      trades,
-      notes: document.getElementById('notes').value.trim()
-    };
-
-    // 使用 text/plain 傳送以避免 CORS preflight，GAS 仍可從 postData.contents 讀取
     const res  = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'analyze', trades, notes: document.getElementById('notes').value.trim() })
     });
     const data = await res.json();
-
     if (!data.success) throw new Error(data.error || '後端回傳失敗');
-
     renderReport(data.report);
-
   } catch (err) {
-    showError('送出失敗：' + err.message + '（請確認 GAS URL 正確，且後端已部署）');
+    showError('送出失敗：' + err.message);
   } finally {
     btn.disabled = false;
     btn.innerHTML = '🤖 送出並取得 AI 分析報告';
   }
 }
 
-/** 將 AI 報告渲染到頁面 */
+// ── 渲染報告 ──
 function renderReport(r) {
-  // 顯示報告區
   const area = document.getElementById('reportArea');
   area.style.display = 'block';
   area.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // 統計數字
   document.getElementById('rTotal').textContent = r.total_trades ?? '—';
   document.getElementById('rWin').textContent   = r.win_trades   ?? '—';
   document.getElementById('rLoss').textContent  = r.loss_trades  ?? '—';
 
-  const pnl    = r.net_pnl ?? 0;
-  const pnlEl  = document.getElementById('rPnl');
-  const pnlBox = document.getElementById('rPnlBox');
-  pnlEl.textContent = (pnl >= 0 ? '+' : '') + pnl.toLocaleString() + ' 元';
-  pnlBox.className  = 'stat-box pnl ' + (pnl > 0 ? 'profit' : pnl < 0 ? 'loss' : '');
+  const pnl = r.net_pnl ?? 0;
+  document.getElementById('rPnl').textContent   = (pnl >= 0 ? '+' : '') + pnl.toLocaleString() + ' 元';
+  document.getElementById('rPnlBox').className  = 'stat-box pnl ' + (pnl > 0 ? 'profit' : pnl < 0 ? 'loss' : '');
 
-  // 評分條（延遲動畫）
   const eScore = Math.min(100, Math.max(0, r.emotion_score    ?? 50));
   const dScore = Math.min(100, Math.max(0, r.discipline_score ?? 50));
-  setTimeout(() => {
-    document.getElementById('emotionBar').style.width       = eScore + '%';
-    document.getElementById('disciplineBar').style.width    = dScore + '%';
-    // 顏色依分數變化
-    document.getElementById('emotionBar').style.background  = scoreColor(eScore);
-    document.getElementById('disciplineBar').style.background = scoreColor(dScore);
-  }, 80);
   document.getElementById('emotionScore').textContent    = eScore;
   document.getElementById('disciplineScore').textContent = dScore;
+  setTimeout(() => {
+    document.getElementById('emotionBar').style.width      = eScore + '%';
+    document.getElementById('disciplineBar').style.width   = dScore + '%';
+    document.getElementById('emotionBar').style.background    = scoreColor(eScore);
+    document.getElementById('disciplineBar').style.background = scoreColor(dScore);
+  }, 80);
 
-  // 四維度文字
   document.getElementById('rEmotion').textContent     = r.emotion_status      || '—';
   document.getElementById('rDiscipline').textContent  = r.strategy_discipline || '—';
   document.getElementById('rBehavior').textContent    = r.behavior_pattern    || '—';
   document.getElementById('rImprovement').textContent = r.improvement         || '—';
-
-  // 完整報告
-  document.getElementById('rFull').textContent = r.full_report || '—';
+  document.getElementById('rFull').textContent        = r.full_report         || '—';
 }
 
-/** 依分數回傳顏色（紅→黃→綠） */
-function scoreColor(score) {
-  if (score >= 70) return 'var(--profit)';
-  if (score >= 40) return 'var(--warn)';
-  return 'var(--loss)';
+function scoreColor(s) {
+  return s >= 70 ? 'var(--profit)' : s >= 40 ? 'var(--warn)' : 'var(--loss)';
 }
 
-/** 顯示錯誤訊息 */
 function showError(msg) {
   const el = document.getElementById('errorBanner');
   if (!msg) { el.style.display = 'none'; return; }
@@ -1034,60 +1006,43 @@ function showError(msg) {
 }
 
 // ============================================================
-// AI 對話功能
+// AI 對話
 // ============================================================
-
-/** 點擊範例問題 */
 function sendHint(btn) {
   document.getElementById('chatInput').value = btn.textContent.replace(/^[^\w\u4e00-\u9fff]+/, '').trim();
   document.getElementById('chatHints').style.display = 'none';
   sendChat();
 }
 
-/** 送出對話訊息 */
 async function sendChat() {
   const input = document.getElementById('chatInput');
   const msg   = input.value.trim();
   if (!msg) return;
 
-  // 確認 GAS URL
   if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
-    appendMsg('system', '⚠️ 請先設定 GAS_URL 後才能使用 AI 對話功能');
+    appendMsg('system', '⚠️ 請先設定 GAS_URL');
     return;
   }
 
-  // 顯示使用者訊息
   appendMsg('user', msg);
   chatHistory.push({ role: 'user', content: msg });
   input.value = '';
-  input.style.height = '40px';
-
-  // 隱藏範例提示
+  input.style.height = '44px';
   document.getElementById('chatHints').style.display = 'none';
 
-  // 顯示 AI 思考中
   const loadingEl = appendMsg('ai', '…');
   const sendBtn   = document.getElementById('chatSendBtn');
   sendBtn.disabled = true;
 
   try {
     const res  = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'chat',
-        message: msg,
-        history: chatHistory.slice(-12), // 只傳最近 12 輪，控制 token 用量
-        history_data: historyData        // 歷史交易紀錄，讓 AI 直接分析
-      })
+      method: 'POST', headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'chat', message: msg, history: chatHistory.slice(-12) })
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.error || '對話失敗');
-
-    // 更新 AI 回覆
     loadingEl.textContent = data.reply;
     chatHistory.push({ role: 'ai', content: data.reply });
-
   } catch (err) {
     loadingEl.textContent = '❌ ' + err.message;
   } finally {
@@ -1095,7 +1050,6 @@ async function sendChat() {
   }
 }
 
-/** 在對話框中新增一條訊息 */
 function appendMsg(role, text) {
   const box = document.getElementById('chatMessages');
   const el  = document.createElement('div');
