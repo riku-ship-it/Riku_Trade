@@ -3,348 +3,989 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI 翻譯工具</title>
+  <title>當沖交易日誌 AI 分析系統</title>
+
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* ── 全域變數與重置 ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d1117;
+      --bg2:       #161b22;
+      --bg3:       #21262d;
+      --border:    #30363d;
+      --text:      #e6edf3;
+      --muted:     #8b949e;
+      --profit:    #3fb950;
+      --loss:      #f85149;
+      --accent:    #388bfd;
+      --accent2:   #1f6feb;
+      --warn:      #d29922;
+      --radius:    10px;
     }
 
     body {
-      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-      background: #f0f2f5;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .container {
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-      padding: 40px;
-      width: 100%;
-      max-width: 680px;
-    }
-
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: #1a1a2e;
-      margin-bottom: 6px;
-      text-align: center;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #888;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Noto Sans TC', 'PingFang TC', Arial, sans-serif;
       font-size: 14px;
-      margin-bottom: 32px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      color: #444;
-      margin-bottom: 8px;
-    }
-
-    textarea {
-      width: 100%;
-      height: 160px;
-      padding: 14px 16px;
-      font-size: 15px;
-      color: #222;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s;
       line-height: 1.6;
-      font-family: inherit;
+      min-height: 100vh;
     }
 
-    textarea:focus {
-      border-color: #4f8ef7;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 13px 20px;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s, opacity 0.2s;
+    /* ── 頁首 ── */
+    .header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-logo { font-size: 22px; }
+    .header h1  { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
+    .header-sub { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+    /* ── 主容器 ── */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .main { grid-template-columns: 1fr; }
+    }
+
+    /* ── 通用卡片 ── */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
       gap: 8px;
     }
+    .card-body { padding: 18px; }
 
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-en {
-      background: #4f8ef7;
-      color: #fff;
-    }
-
-    .btn-en:hover:not(:disabled) {
-      background: #3a7be0;
-    }
-
-    .btn-ja {
-      background: #e74c6f;
-      color: #fff;
-    }
-
-    .btn-ja:hover:not(:disabled) {
-      background: #cf3a5d;
-    }
-
-    .result-area {
-      margin-top: 28px;
-      display: none;
-    }
-
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .result-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #444;
-      display: flex;
+    /* ── 按鈕 ── */
+    .btn {
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-    }
-
-    .lang-badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .lang-badge.en { background: #e8f0fe; color: #4f8ef7; }
-    .lang-badge.ja { background: #fde8ed; color: #e74c6f; }
-
-    .copy-btn {
-      background: none;
-      border: 1px solid #ddd;
+      padding: 8px 16px;
+      border: none;
       border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      color: #666;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:active   { transform: scale(.97); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-accent   { background: var(--accent2); color: #fff; }
+    .btn-accent:hover:not(:disabled) { background: var(--accent); }
+    .btn-ghost    { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn-danger   { background: #3d1a1a; color: var(--loss); border: 1px solid #5a2020; }
+    .btn-danger:hover { background: #5a2020; }
+    .btn-sm       { padding: 4px 10px; font-size: 12px; }
+    .btn-submit   {
+      width: 100%; padding: 13px; font-size: 15px; font-weight: 700;
+      background: linear-gradient(135deg, var(--accent2), #0d419d);
+      color: #fff; border: none; border-radius: var(--radius);
+      cursor: pointer; transition: opacity .2s, transform .1s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover:not(:disabled) { opacity: .9; }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── 交易輸入區 ── */
+    .trade-toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
-    .copy-btn:hover { background: #f5f5f5; }
+    /* ── 表格 ── */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 900px;
+    }
+    thead { background: var(--bg3); }
+    th {
+      padding: 9px 8px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .5px;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(56,139,253,.06); }
 
-    .result-box {
-      background: #f8f9fb;
-      border: 2px solid #e8eaf0;
-      border-radius: 10px;
-      padding: 16px;
-      font-size: 15px;
-      line-height: 1.7;
-      color: #222;
-      min-height: 80px;
+    /* ── 表格輸入框 ── */
+    .cell-input {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 4px 6px;
+      text-align: center;
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+    .cell-input:focus {
+      border-color: var(--accent);
+      background: var(--bg);
+    }
+    .cell-select {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 4px 6px;
+      width: 100%;
+      outline: none;
+      cursor: pointer;
+    }
+    .cell-select:focus { border-color: var(--accent); }
+
+    /* 自動計算欄位（唯讀） */
+    .cell-auto {
+      display: block;
+      text-align: center;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 13px;
+      min-width: 70px;
+    }
+    .cell-auto.profit { color: var(--profit); }
+    .cell-auto.loss   { color: var(--loss); }
+    .cell-auto.neutral{ color: var(--muted); }
+
+    /* ── 備註欄 ── */
+    .notes-wrap { margin-top: 14px; }
+    .notes-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    textarea.notes {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 10px 12px;
+      resize: vertical;
+      outline: none;
+      min-height: 70px;
+      line-height: 1.6;
+      font-family: inherit;
+      transition: border-color .15s;
+    }
+    textarea.notes:focus { border-color: var(--accent); }
+
+    /* ── 送出區 ── */
+    .submit-wrap { margin-top: 16px; }
+
+    /* ── 報告區 ── */
+    #reportArea { display: none; margin-top: 20px; }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-box .val {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .stat-box .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .stat-box.profit .val { color: var(--profit); }
+    .stat-box.loss   .val { color: var(--loss);   }
+    .stat-box.pnl    .val { font-size: 18px; }
+
+    /* 評分條 */
+    .score-section { margin-bottom: 16px; }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .score-label { width: 90px; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+    .score-bar-wrap {
+      flex: 1;
+      background: var(--bg3);
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .score-bar {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 1.2s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+    .score-val { width: 36px; text-align: right; font-size: 13px; font-weight: 700; }
+
+    /* 報告文字區塊 */
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 600px) { .report-grid { grid-template-columns: 1fr; } }
+    .report-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .report-box .rb-title {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+    .report-box .rb-text { font-size: 13px; line-height: 1.7; }
+
+    .full-report {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.8;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .loading {
+    /* ── AI 對話框 ── */
+    .chat-wrap { position: sticky; top: 70px; }
+    .chat-messages {
+      height: 420px;
+      overflow-y: auto;
+      padding: 14px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 10px;
-      color: #888;
-      font-size: 14px;
-      padding: 16px;
-      justify-content: center;
+      background: var(--bg);
     }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .msg {
+      max-width: 85%;
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.65;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .msg.user {
+      background: var(--accent2);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.ai {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.system {
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      align-self: center;
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* 範例問題提示 */
+    .chat-hints {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 14px 10px;
+    }
+    .hint-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .hint-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .chat-input {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 8px 12px;
+      outline: none;
+      resize: none;
+      height: 40px;
+      min-height: 40px;
+      max-height: 120px;
+      line-height: 1.5;
+      font-family: inherit;
+      transition: border-color .15s;
+      overflow-y: hidden;
+    }
+    .chat-input:focus { border-color: var(--accent); }
+
+    /* ── 通用工具 ── */
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tag-long  { background: #1a3a1a; color: var(--profit); }
+    .tag-short { background: #3a1a1a; color: var(--loss);   }
 
     .spinner {
-      width: 18px;
-      height: 18px;
-      border: 3px solid #e0e0e0;
-      border-top-color: #4f8ef7;
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: #fff;
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin .7s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .error-msg {
-      color: #e74c3c;
-      background: #fdf0ef;
-      border: 1px solid #f5c6c0;
+    .error-banner {
+      background: #3d1a1a;
+      border: 1px solid #5a2020;
       border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 14px;
-      margin-top: 16px;
+      color: var(--loss);
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 12px;
       display: none;
     }
 
-    .divider {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 28px 0;
-    }
-
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #bbb;
-      margin-top: 28px;
-    }
+    /* ── 捲軸美化 ── */
+    ::-webkit-scrollbar       { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>✦ AI 翻譯工具</h1>
-  <p class="subtitle">由 Gemini 驅動 · 支援中文 → 英文 / 日文</p>
+<!-- ══ 頁首 ══ -->
+<header class="header">
+  <span class="header-logo">📊</span>
+  <h1>當沖交易日誌 AI 分析系統</h1>
+  <span class="header-sub">Powered by Gemini · 資料存入 Google Sheet</span>
+</header>
 
-  <label for="inputText">輸入文字</label>
-  <textarea id="inputText" placeholder="在這裡輸入想要翻譯的文字…"></textarea>
+<!-- ══ 主內容區 ══ -->
+<div class="main">
 
-  <div class="buttons">
-    <button class="btn btn-en" id="btnEn" onclick="doTranslate('english')">
-      🇺🇸 翻譯成英文
-    </button>
-    <button class="btn btn-ja" id="btnJa" onclick="doTranslate('japanese')">
-      🇯🇵 翻譯成日文
-    </button>
-  </div>
+  <!-- ===== 左側：交易輸入 + 報告 ===== -->
+  <div class="left-col">
 
-  <div class="error-msg" id="errorMsg"></div>
-
-  <div class="result-area" id="resultArea">
-    <hr class="divider" />
-    <div class="result-header">
-      <div class="result-label">
-        翻譯結果
-        <span class="lang-badge" id="langBadge"></span>
+    <!-- 交易輸入卡 -->
+    <div class="card">
+      <div class="card-header">
+        ✏️ 今日交易紀錄
+        <span style="margin-left:auto;font-weight:400;color:var(--muted);font-size:12px;">
+          手續費按 0.1425%（雙邊），交易稅按 0.15%（當沖減半）自動計算
+        </span>
       </div>
-      <button class="copy-btn" onclick="copyResult()">複製</button>
+      <div class="card-body">
+
+        <!-- 工具列 -->
+        <div class="trade-toolbar">
+          <button class="btn btn-accent" onclick="addRow()">＋ 新增一筆</button>
+          <button class="btn btn-ghost" onclick="fillTodayDate()">📅 填入今日日期</button>
+          <button class="btn btn-danger btn-sm" onclick="clearAllRows()" style="margin-left:auto">🗑 清空</button>
+        </div>
+
+        <!-- 交易表格 -->
+        <div class="table-wrap">
+          <table id="tradeTable">
+            <thead>
+              <tr>
+                <th style="width:36px">#</th>
+                <th style="min-width:65px">日期</th>
+                <th style="min-width:75px">股票代號</th>
+                <th style="width:70px">方向</th>
+                <th style="width:65px">進場時間</th>
+                <th style="width:65px">出場時間</th>
+                <th style="width:70px">進場價</th>
+                <th style="width:70px">出場價</th>
+                <th style="width:55px">張數</th>
+                <th style="min-width:80px">毛損益</th>
+                <th style="min-width:80px">手費+稅</th>
+                <th style="min-width:85px">淨損益</th>
+                <th style="min-width:65px">策略代號</th>
+                <th style="width:36px"></th>
+              </tr>
+            </thead>
+            <tbody id="tradeBody">
+              <!-- 由 JS 動態產生 -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 備註欄 -->
+        <div class="notes-wrap">
+          <div class="notes-label">📝 今日備註（可填入盤前計畫、盤後心得、特殊市況等，AI 會納入分析）</div>
+          <textarea class="notes" id="notes" placeholder="選填：今日操作心得、情緒狀態、特殊原因…"></textarea>
+        </div>
+
+        <!-- 送出按鈕 -->
+        <div class="submit-wrap">
+          <button class="btn-submit" id="submitBtn" onclick="submitTrades()">
+            🤖 送出並取得 AI 分析報告
+          </button>
+        </div>
+
+        <!-- 錯誤訊息 -->
+        <div class="error-banner" id="errorBanner"></div>
+
+      </div><!-- /card-body -->
+    </div><!-- /card -->
+
+    <!-- ── AI 分析報告（送出後顯示）── -->
+    <div id="reportArea">
+      <div class="card">
+        <div class="card-header">🧠 AI 分析報告</div>
+        <div class="card-body">
+
+          <!-- 統計數字 -->
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="val" id="rTotal">—</div>
+              <div class="lbl">總交易筆數</div>
+            </div>
+            <div class="stat-box profit">
+              <div class="val" id="rWin">—</div>
+              <div class="lbl">獲利筆數</div>
+            </div>
+            <div class="stat-box loss">
+              <div class="val" id="rLoss">—</div>
+              <div class="lbl">虧損筆數</div>
+            </div>
+            <div class="stat-box pnl" id="rPnlBox">
+              <div class="val" id="rPnl">—</div>
+              <div class="lbl">當日淨損益</div>
+            </div>
+          </div>
+
+          <!-- 評分條 -->
+          <div class="score-section">
+            <div class="score-row">
+              <span class="score-label">😌 情緒穩定度</span>
+              <div class="score-bar-wrap">
+                <div class="score-bar" id="emotionBar" style="background:var(--profit)"></div>
+              </div>
+              <span class="score-val" id="emotionScore">—</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label">📐 策略紀律</span>
+              <div class="score-bar-wrap">
+                <div class="score-bar" id="disciplineBar" style="background:var(--accent)"></div>
+              </div>
+              <span class="score-val" id="disciplineScore">—</span>
+            </div>
+          </div>
+
+          <!-- 四維度分析 -->
+          <div class="report-grid">
+            <div class="report-box">
+              <div class="rb-title">😌 情緒狀態</div>
+              <div class="rb-text" id="rEmotion">—</div>
+            </div>
+            <div class="report-box">
+              <div class="rb-title">📐 策略執行紀律</div>
+              <div class="rb-text" id="rDiscipline">—</div>
+            </div>
+            <div class="report-box">
+              <div class="rb-title">🔍 行為模式觀察</div>
+              <div class="rb-text" id="rBehavior">—</div>
+            </div>
+            <div class="report-box">
+              <div class="rb-title">💡 改善建議</div>
+              <div class="rb-text" id="rImprovement">—</div>
+            </div>
+          </div>
+
+          <!-- 完整報告 -->
+          <div class="card-header" style="border-radius:8px 8px 0 0;margin-bottom:0">
+            📄 完整分析報告
+          </div>
+          <div class="full-report" id="rFull">—</div>
+
+        </div><!-- /card-body -->
+      </div><!-- /card -->
+    </div><!-- /reportArea -->
+
+  </div><!-- /left-col -->
+
+  <!-- ===== 右側：AI 對話框 ===== -->
+  <div class="right-col">
+    <div class="card chat-wrap">
+      <div class="card-header">💬 AI 交易顧問對話</div>
+
+      <!-- 對話記錄 -->
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg system">歡迎！你可以詢問我任何台股當沖相關問題 🎯</div>
+      </div>
+
+      <!-- 範例問題 -->
+      <div class="chat-hints" id="chatHints">
+        <button class="hint-btn" onclick="sendHint(this)">📉 我今天連續虧損三筆，應該怎麼調整心態？</button>
+        <button class="hint-btn" onclick="sendHint(this)">⏰ 當沖的最佳進出場時段是哪些？</button>
+        <button class="hint-btn" onclick="sendHint(this)">🔒 如何設定合理的停損點避免大虧？</button>
+      </div>
+
+      <!-- 輸入區 -->
+      <div class="chat-input-row">
+        <textarea
+          class="chat-input"
+          id="chatInput"
+          placeholder="輸入問題，按 Enter 送出（Shift+Enter 換行）"
+          rows="1"
+        ></textarea>
+        <button class="btn btn-accent" id="chatSendBtn" onclick="sendChat()" style="height:40px;align-self:flex-end">
+          ➤
+        </button>
+      </div>
     </div>
-    <div class="result-box" id="resultBox"></div>
   </div>
 
-  <div class="footer">Powered by Google Gemini API</div>
-</div>
+</div><!-- /main -->
 
 <script>
-  // =============================================
-  // ⚠️ 請將下方 URL 換成你的 GAS Web App 網址
-  // =============================================
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkPKMYfY-IPIcOjbWeVvXNtT_1eUU4yU25UMyKuGrhzDgc28K4EQGppZt0Suyug3dqSg/exec';
-  // =============================================
+// ============================================================
+// ⚠️ 請將下方 URL 替換為你部署後的 GAS Web App 網址
+// ============================================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkPKMYfY-IPIcOjbWeVvXNtT_1eUU4yU25UMyKuGrhzDgc28K4EQGppZt0Suyug3dqSg/exec';
+// ============================================================
 
-  async function doTranslate(language) {
-    const inputText = document.getElementById('inputText').value.trim();
-    const errorMsg = document.getElementById('errorMsg');
-    const resultArea = document.getElementById('resultArea');
-    const resultBox = document.getElementById('resultBox');
-    const langBadge = document.getElementById('langBadge');
-    const btnEn = document.getElementById('btnEn');
-    const btnJa = document.getElementById('btnJa');
+// ── 對話歷史（用於多輪 AI 對話）──
+let chatHistory = [];
 
-    // 隱藏舊的錯誤與結果
-    errorMsg.style.display = 'none';
-    resultArea.style.display = 'none';
+// ── 費率常數（台股當沖）──
+const FEE_RATE = 0.001425;   // 手續費（雙邊），可依折扣調整
+const TAX_RATE = 0.0015;     // 交易稅（當沖減半）
 
-    if (!inputText) {
-      showError('請輸入要翻譯的文字');
+// ============================================================
+// 交易表格管理
+// ============================================================
+
+/** 取得今日日期字串 yyyy/MM/dd */
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}/${m}/${day}`;
+}
+
+/** 新增一行空白交易 */
+function addRow(date) {
+  const tbody = document.getElementById('tradeBody');
+  const idx   = tbody.rows.length + 1;
+  const row   = document.createElement('tr');
+  row.dataset.idx = idx;
+  row.innerHTML = `
+    <td style="text-align:center;color:var(--muted);font-size:12px">${idx}</td>
+    <td><input class="cell-input" style="width:88px" type="text" placeholder="yyyy/MM/dd"
+        value="${date || ''}" oninput="recalc(this)"></td>
+    <td><input class="cell-input" style="width:80px" type="text" placeholder="如 2330"></td>
+    <td>
+      <select class="cell-select" onchange="recalc(this)">
+        <option value="多">多（做多）</option>
+        <option value="空">空（放空）</option>
+      </select>
+    </td>
+    <td><input class="cell-input" style="width:60px" type="text" placeholder="09:05" oninput="recalc(this)"></td>
+    <td><input class="cell-input" style="width:60px" type="text" placeholder="10:30" oninput="recalc(this)"></td>
+    <td><input class="cell-input" style="width:65px" type="number" step="0.01" placeholder="進場價" oninput="recalc(this)"></td>
+    <td><input class="cell-input" style="width:65px" type="number" step="0.01" placeholder="出場價" oninput="recalc(this)"></td>
+    <td><input class="cell-input" style="width:48px" type="number" min="1" placeholder="1" value="1" oninput="recalc(this)"></td>
+    <td><span class="cell-auto neutral" id="gross_${idx}">—</span></td>
+    <td><span class="cell-auto neutral" id="fee_${idx}">—</span></td>
+    <td><span class="cell-auto neutral" id="net_${idx}">—</span></td>
+    <td><input class="cell-input" style="width:60px" type="text" placeholder="S01"></td>
+    <td><button class="btn btn-danger btn-sm" onclick="removeRow(this)" title="刪除此行">✕</button></td>
+  `;
+  tbody.appendChild(row);
+  // 讓序號欄追蹤更新
+  row.querySelector('input[placeholder="09:05"]').addEventListener('change', () => recalc(row));
+}
+
+/** 刪除一行 */
+function removeRow(btn) {
+  const row = btn.closest('tr');
+  row.remove();
+  // 重新編號
+  const rows = document.querySelectorAll('#tradeBody tr');
+  rows.forEach((r, i) => { r.cells[0].textContent = i + 1; });
+}
+
+/** 清空所有行 */
+function clearAllRows() {
+  if (!confirm('確定要清空所有交易紀錄嗎？')) return;
+  document.getElementById('tradeBody').innerHTML = '';
+}
+
+/** 填入今日日期到所有空白日期欄 */
+function fillTodayDate() {
+  const today = todayStr();
+  document.querySelectorAll('#tradeBody tr').forEach(row => {
+    const dateInput = row.cells[1].querySelector('input');
+    if (!dateInput.value) dateInput.value = today;
+  });
+}
+
+/** 自動計算毛損益、手費+稅、淨損益 */
+function recalc(el) {
+  const row = el.closest('tr');
+  if (!row) return;
+  const idx = row.dataset.idx;
+
+  const cells     = row.cells;
+  const direction = cells[3].querySelector('select').value;
+  const entryP    = parseFloat(cells[6].querySelector('input').value) || 0;
+  const exitP     = parseFloat(cells[7].querySelector('input').value) || 0;
+  const shares    = parseInt(cells[8].querySelector('input').value)   || 0;
+
+  if (!entryP || !exitP || !shares) {
+    setAutoCell(idx, 'gross', null);
+    setAutoCell(idx, 'fee',   null);
+    setAutoCell(idx, 'net',   null);
+    return;
+  }
+
+  const units    = shares * 1000;
+  const grossRaw = direction === '多'
+    ? (exitP - entryP) * units
+    : (entryP - exitP) * units;
+
+  // 手續費（買進+賣出各一次）+ 交易稅（以賣出金額計）
+  const fee = Math.round((entryP + exitP) * units * FEE_RATE);
+  const tax = Math.round(exitP           * units * TAX_RATE);
+  const totalFee = fee + tax;
+  const netPnl   = Math.round(grossRaw) - totalFee;
+
+  setAutoCell(idx, 'gross', Math.round(grossRaw));
+  setAutoCell(idx, 'fee',   totalFee);
+  setAutoCell(idx, 'net',   netPnl);
+}
+
+function setAutoCell(idx, type, val) {
+  const map = { gross: `gross_${idx}`, fee: `fee_${idx}`, net: `net_${idx}` };
+  const el  = document.getElementById(map[type]);
+  if (!el) return;
+  if (val === null) {
+    el.textContent = '—';
+    el.className = 'cell-auto neutral';
+    return;
+  }
+  el.textContent = (val >= 0 ? '+' : '') + val.toLocaleString();
+  el.className   = 'cell-auto ' + (val > 0 ? 'profit' : val < 0 ? 'loss' : 'neutral');
+}
+
+// 頁面載入時預設一行
+window.addEventListener('DOMContentLoaded', () => {
+  addRow(todayStr());
+  // 自動調整 chat textarea 高度
+  const chatInput = document.getElementById('chatInput');
+  chatInput.addEventListener('input', () => {
+    chatInput.style.height = '40px';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+  });
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  });
+});
+
+// ============================================================
+// 送出交易 + 取得 AI 報告
+// ============================================================
+async function submitTrades() {
+  showError('');
+
+  // 收集表格資料
+  const rows   = document.querySelectorAll('#tradeBody tr');
+  const trades = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    const cells = rows[i].cells;
+    const date    = cells[1].querySelector('input').value.trim();
+    const stock   = cells[2].querySelector('input').value.trim();
+    const dir     = cells[3].querySelector('select').value;
+    const entryT  = cells[4].querySelector('input').value.trim();
+    const exitT   = cells[5].querySelector('input').value.trim();
+    const entryP  = parseFloat(cells[6].querySelector('input').value);
+    const exitP   = parseFloat(cells[7].querySelector('input').value);
+    const shares  = parseInt(cells[8].querySelector('input').value);
+    const stratId = cells[12].querySelector('input').value.trim();
+
+    // 基本驗證
+    if (!date || !stock || !entryP || !exitP || !shares) {
+      showError(`第 ${i + 1} 筆資料不完整，請確認日期、股票代號、進出場價、張數均已填寫`);
       return;
     }
 
-    if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
-      showError('請先在 Index.html 中設定 GAS_URL（Google Apps Script Web App 網址）');
-      return;
-    }
+    // 重新計算損益（確保精確）
+    const units    = shares * 1000;
+    const grossRaw = dir === '多' ? (exitP - entryP) * units : (entryP - exitP) * units;
+    const fee      = Math.round((entryP + exitP) * units * FEE_RATE);
+    const tax      = Math.round(exitP * units * TAX_RATE);
+    const netPnl   = Math.round(grossRaw) - fee - tax;
 
-    // 顯示 loading 狀態
-    btnEn.disabled = true;
-    btnJa.disabled = true;
-    resultArea.style.display = 'block';
-    resultBox.innerHTML = `<div class="loading"><div class="spinner"></div>翻譯中，請稍候…</div>`;
-    langBadge.textContent = language === 'japanese' ? 'JA' : 'EN';
-    langBadge.className = 'lang-badge ' + (language === 'japanese' ? 'ja' : 'en');
-
-    try {
-      const response = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' }, // GAS 需要 text/plain 避免 CORS preflight
-        body: JSON.stringify({ text: inputText, language })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        resultBox.textContent = data.translation;
-      } else {
-        resultArea.style.display = 'none';
-        showError(data.error || '翻譯失敗，請稍後再試');
-      }
-    } catch (err) {
-      resultArea.style.display = 'none';
-      showError('網路錯誤，無法連接到翻譯服務。請確認 GAS_URL 設定是否正確。');
-    } finally {
-      btnEn.disabled = false;
-      btnJa.disabled = false;
-    }
-  }
-
-  function showError(message) {
-    const errorMsg = document.getElementById('errorMsg');
-    errorMsg.textContent = '⚠️ ' + message;
-    errorMsg.style.display = 'block';
-  }
-
-  function copyResult() {
-    const text = document.getElementById('resultBox').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.querySelector('.copy-btn');
-      btn.textContent = '已複製 ✓';
-      setTimeout(() => { btn.textContent = '複製'; }, 2000);
+    trades.push({
+      date, stock, direction: dir,
+      entry_time: entryT, exit_time: exitT,
+      entry_price: entryP, exit_price: exitP,
+      shares,
+      gross_pnl:  Math.round(grossRaw),
+      tax_fee:    fee + tax,
+      net_pnl:    netPnl,
+      strategy_id: stratId || ''
     });
   }
 
-  // 支援 Ctrl+Enter 快速翻譯（預設英文）
-  document.getElementById('inputText').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      translate('english');
-    }
-  });
+  if (trades.length === 0) {
+    showError('請至少新增一筆交易後再送出');
+    return;
+  }
+
+  // 確認 GAS URL 已設定
+  if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+    showError('請先在 Index.html 的第一行 JavaScript 中填入你的 GAS Web App URL（const GAS_URL = \'...\')');
+    return;
+  }
+
+  // 更新 UI 為載入狀態
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> AI 分析中，請稍候…';
+
+  try {
+    const payload = {
+      action: 'analyze',
+      trades,
+      notes: document.getElementById('notes').value.trim()
+    };
+
+    // 使用 text/plain 傳送以避免 CORS preflight，GAS 仍可從 postData.contents 讀取
+    const res  = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (!data.success) throw new Error(data.error || '後端回傳失敗');
+
+    renderReport(data.report);
+
+  } catch (err) {
+    showError('送出失敗：' + err.message + '（請確認 GAS URL 正確，且後端已部署）');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🤖 送出並取得 AI 分析報告';
+  }
+}
+
+/** 將 AI 報告渲染到頁面 */
+function renderReport(r) {
+  // 顯示報告區
+  const area = document.getElementById('reportArea');
+  area.style.display = 'block';
+  area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // 統計數字
+  document.getElementById('rTotal').textContent = r.total_trades ?? '—';
+  document.getElementById('rWin').textContent   = r.win_trades   ?? '—';
+  document.getElementById('rLoss').textContent  = r.loss_trades  ?? '—';
+
+  const pnl    = r.net_pnl ?? 0;
+  const pnlEl  = document.getElementById('rPnl');
+  const pnlBox = document.getElementById('rPnlBox');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + pnl.toLocaleString() + ' 元';
+  pnlBox.className  = 'stat-box pnl ' + (pnl > 0 ? 'profit' : pnl < 0 ? 'loss' : '');
+
+  // 評分條（延遲動畫）
+  const eScore = Math.min(100, Math.max(0, r.emotion_score    ?? 50));
+  const dScore = Math.min(100, Math.max(0, r.discipline_score ?? 50));
+  setTimeout(() => {
+    document.getElementById('emotionBar').style.width       = eScore + '%';
+    document.getElementById('disciplineBar').style.width    = dScore + '%';
+    // 顏色依分數變化
+    document.getElementById('emotionBar').style.background  = scoreColor(eScore);
+    document.getElementById('disciplineBar').style.background = scoreColor(dScore);
+  }, 80);
+  document.getElementById('emotionScore').textContent    = eScore;
+  document.getElementById('disciplineScore').textContent = dScore;
+
+  // 四維度文字
+  document.getElementById('rEmotion').textContent     = r.emotion_status      || '—';
+  document.getElementById('rDiscipline').textContent  = r.strategy_discipline || '—';
+  document.getElementById('rBehavior').textContent    = r.behavior_pattern    || '—';
+  document.getElementById('rImprovement').textContent = r.improvement         || '—';
+
+  // 完整報告
+  document.getElementById('rFull').textContent = r.full_report || '—';
+}
+
+/** 依分數回傳顏色（紅→黃→綠） */
+function scoreColor(score) {
+  if (score >= 70) return 'var(--profit)';
+  if (score >= 40) return 'var(--warn)';
+  return 'var(--loss)';
+}
+
+/** 顯示錯誤訊息 */
+function showError(msg) {
+  const el = document.getElementById('errorBanner');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ============================================================
+// AI 對話功能
+// ============================================================
+
+/** 點擊範例問題 */
+function sendHint(btn) {
+  document.getElementById('chatInput').value = btn.textContent.replace(/^[^\w\u4e00-\u9fff]+/, '').trim();
+  document.getElementById('chatHints').style.display = 'none';
+  sendChat();
+}
+
+/** 送出對話訊息 */
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg   = input.value.trim();
+  if (!msg) return;
+
+  // 確認 GAS URL
+  if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+    appendMsg('system', '⚠️ 請先設定 GAS_URL 後才能使用 AI 對話功能');
+    return;
+  }
+
+  // 顯示使用者訊息
+  appendMsg('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+  input.value = '';
+  input.style.height = '40px';
+
+  // 隱藏範例提示
+  document.getElementById('chatHints').style.display = 'none';
+
+  // 顯示 AI 思考中
+  const loadingEl = appendMsg('ai', '…');
+  const sendBtn   = document.getElementById('chatSendBtn');
+  sendBtn.disabled = true;
+
+  try {
+    const res  = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'chat',
+        message: msg,
+        history: chatHistory.slice(-12) // 只傳最近 12 輪，控制 token 用量
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || '對話失敗');
+
+    // 更新 AI 回覆
+    loadingEl.textContent = data.reply;
+    chatHistory.push({ role: 'ai', content: data.reply });
+
+  } catch (err) {
+    loadingEl.textContent = '❌ ' + err.message;
+  } finally {
+    sendBtn.disabled = false;
+  }
+}
+
+/** 在對話框中新增一條訊息 */
+function appendMsg(role, text) {
+  const box = document.getElementById('chatMessages');
+  const el  = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.textContent = text;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
+  return el;
+}
 </script>
 
 </body>
