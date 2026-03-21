@@ -63,6 +63,95 @@
       .main { grid-template-columns: 1fr; }
     }
 
+    /* ── 手機響應式（768px 以下）── */
+    @media (max-width: 768px) {
+      body { font-size: 14px; }
+
+      .header { padding: 12px 16px; }
+      .header h1 { font-size: 15px; }
+      .header-sub { display: none; }
+
+      .main { padding: 12px 10px 32px; gap: 14px; }
+
+      /* 按鈕最小高度 48px */
+      .btn { min-height: 48px; font-size: 14px; padding: 10px 16px; }
+      .btn-sm { min-height: 40px; }
+      .btn-submit { min-height: 48px; font-size: 15px; }
+
+      /* Chat 右欄取消 sticky */
+      .chat-wrap { position: static; }
+      .chat-messages { height: 320px; }
+
+      /* ── 表格改卡片 ── */
+      .table-wrap {
+        border: none;
+        border-radius: 0;
+        overflow-x: visible;
+        background: transparent;
+      }
+      table, tbody { display: block; min-width: 0; }
+      thead { display: none; }
+
+      tbody tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 14px;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 14px 14px 14px;
+        margin-bottom: 10px;
+        position: relative;
+      }
+      /* 隱藏序號欄 */
+      tbody td:nth-child(1) { display: none; }
+      /* 刪除按鈕移至右上角 */
+      tbody td:last-child {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        grid-column: unset;
+        padding: 0;
+        border: none;
+      }
+
+      tbody td {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border-bottom: none !important;
+        padding: 0 !important;
+        vertical-align: top;
+      }
+      /* 欄位標籤（偽元素） */
+      tbody td::before {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      tbody td:nth-child(2)::before  { content: "日期"; }
+      tbody td:nth-child(3)::before  { content: "股票代號"; }
+      tbody td:nth-child(4)::before  { content: "方向"; }
+      tbody td:nth-child(5)::before  { content: "進場時間"; }
+      tbody td:nth-child(6)::before  { content: "出場時間"; }
+      tbody td:nth-child(7)::before  { content: "進場價"; }
+      tbody td:nth-child(8)::before  { content: "出場價"; }
+      tbody td:nth-child(9)::before  { content: "張數"; }
+      tbody td:nth-child(10)::before { content: "毛損益"; }
+      tbody td:nth-child(11)::before { content: "手費+稅"; }
+      tbody td:nth-child(12)::before { content: "淨損益"; }
+      tbody td:nth-child(13)::before { content: "策略代號"; }
+
+      .cell-input  { width: 100% !important; font-size: 14px; }
+      .cell-select { width: 100% !important; font-size: 14px; }
+      .cell-auto   { font-size: 14px; min-width: 0; text-align: left; }
+
+      /* 報告統計格 */
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+
     /* ── 通用卡片 ── */
     .card {
       background: var(--bg2);
@@ -632,6 +721,9 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkPKMYfY-IPIcOjbWeVvXN
 // ── 對話歷史（用於多輪 AI 對話）──
 let chatHistory = [];
 
+// ── 歷史交易紀錄（從 Sheet 載入，AI 對話時一併傳送）──
+let historyData = null;
+
 // ── 費率常數（台股當沖）──
 const FEE_RATE = 0.001425;   // 手續費（雙邊），可依折扣調整
 const TAX_RATE = 0.0015;     // 交易稅（當沖減半）
@@ -754,6 +846,30 @@ function setAutoCell(idx, type, val) {
   el.className   = 'cell-auto ' + (val > 0 ? 'profit' : val < 0 ? 'loss' : 'neutral');
 }
 
+// ============================================================
+// 載入歷史交易紀錄（頁面啟動時自動執行）
+// ============================================================
+async function loadHistory() {
+  if (GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') return;
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'get_history' })
+    });
+    const data = await res.json();
+    if (data.success && Array.isArray(data.history)) {
+      historyData = data.history;
+      if (historyData.length > 0) {
+        appendMsg('system', `📂 已載入 ${historyData.length} 筆歷史交易紀錄，AI 可直接分析`);
+      }
+    }
+  } catch (e) {
+    // 靜默失敗，不影響主功能
+    console.warn('載入歷史紀錄失敗：', e.message);
+  }
+}
+
 // 頁面載入時預設一行
 window.addEventListener('DOMContentLoaded', () => {
   addRow(todayStr());
@@ -766,6 +882,8 @@ window.addEventListener('DOMContentLoaded', () => {
   chatInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
   });
+  // 自動載入歷史紀錄
+  loadHistory();
 });
 
 // ============================================================
@@ -959,7 +1077,8 @@ async function sendChat() {
       body: JSON.stringify({
         action: 'chat',
         message: msg,
-        history: chatHistory.slice(-12) // 只傳最近 12 輪，控制 token 用量
+        history: chatHistory.slice(-12), // 只傳最近 12 輪，控制 token 用量
+        history_data: historyData        // 歷史交易紀錄，讓 AI 直接分析
       })
     });
     const data = await res.json();
