@@ -16,9 +16,10 @@ function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
 
-    if (data.action === 'analyze')     return handleAnalyze(data);
-    if (data.action === 'chat')        return handleChat(data);
-    if (data.action === 'get_history') return handleGetHistory();
+    if (data.action === 'analyze')      return handleAnalyze(data);
+    if (data.action === 'analyze_only') return handleAnalyzeOnly(data);
+    if (data.action === 'chat')         return handleChat(data);
+    if (data.action === 'get_history')  return handleGetHistory();
 
     // 相容舊版翻譯功能
     if (data.text) return handleTranslation(data);
@@ -80,6 +81,71 @@ function handleAnalyze(data) {
   let aiReport;
   try {
     // 嘗試去除 markdown 包裝再 parse
+    const jsonStr = rawText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+    aiReport = JSON.parse(jsonStr);
+  } catch (e) {
+    aiReport = { full_report: rawText };
+  }
+
+  const report = {
+    total_trades:        totalTrades,
+    win_trades:          winTrades,
+    loss_trades:         lossTrades,
+    net_pnl:             netPnl,
+    emotion_score:       Number(aiReport.emotion_score)    || 50,
+    discipline_score:    Number(aiReport.discipline_score) || 50,
+    emotion_status:      aiReport.emotion_status      || '',
+    strategy_discipline: aiReport.strategy_discipline || '',
+    behavior_pattern:    aiReport.behavior_pattern    || '',
+    improvement:         aiReport.improvement         || '',
+    full_report:         aiReport.full_report         || rawText
+  };
+
+  return respond({ success: true, report });
+}
+
+// ============================================================
+// action: analyze_only — AI 分析但不存入試算表（儀表板歷史分析用）
+// ============================================================
+function handleAnalyzeOnly(data) {
+  const trades = data.trades || [];
+  const notes  = data.notes  || '';
+
+  if (trades.length === 0) {
+    return respond({ success: false, error: '沒有交易資料' });
+  }
+
+  const totalTrades = trades.length;
+  const winTrades   = trades.filter(t => t.net_pnl > 0).length;
+  const lossTrades  = trades.filter(t => t.net_pnl < 0).length;
+  const netPnl      = trades.reduce((sum, t) => sum + (t.net_pnl || 0), 0);
+
+  // 不執行 saveToSheet，直接呼叫 AI
+  const prompt = buildAnalysisPrompt(trades, notes, { totalTrades, winTrades, lossTrades, netPnl });
+
+  const url     = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7 }
+  };
+
+  const response = UrlFetchApp.fetch(url, {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
+
+  const result = JSON.parse(response.getContentText());
+
+  if (!result.candidates || !result.candidates[0]) {
+    return respond({ success: false, error: 'Gemini API 未回傳結果' });
+  }
+
+  const rawText = result.candidates[0].content.parts[0].text.trim();
+
+  let aiReport;
+  try {
     const jsonStr = rawText.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
     aiReport = JSON.parse(jsonStr);
   } catch (e) {
