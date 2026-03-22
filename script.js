@@ -40,6 +40,18 @@ function toggleChat() {
 }
 
 // ============================================================
+// 日期格式正規化：將 ISO 字串或 yyyy-mm-dd 統一轉為 yyyy/MM/dd
+// ============================================================
+function normDate(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  // GAS Date 物件序列化後的 ISO 格式，如 "2026-01-02T00:00:00.000Z"
+  if (s.includes('T')) return s.substring(0, 10).replace(/-/g, '/');
+  // HTML date input 格式 yyyy-mm-dd
+  return s.replace(/-/g, '/');
+}
+
+// ============================================================
 // 儀表板：載入並計算數據
 // ============================================================
 async function loadDashboard() {
@@ -81,13 +93,22 @@ async function loadDashboard() {
 
     const allTrades = data.history || [];
 
-    // 格式：Sheet 存的日期是 yyyy/MM/dd
+    // 格式：Sheet 存的日期統一正規化為 yyyy/MM/dd 再比較
     const startDate = startVal.replace(/-/g, '/');
     const endDate   = endVal.replace(/-/g, '/');
 
-    const filtered = allTrades.filter(t => {
-      const d = String(t['日期'] || '').trim();
-      return d >= startDate && d <= endDate;
+    const filtered = allTrades.filter((t, idx) => {
+      try {
+        const d = normDate(t['日期']);
+        if (!d) {
+          console.warn(`[第 ${t['_rowIndex'] || idx + 2} 列] 日期欄位為空，略過`);
+          return false;
+        }
+        return d >= startDate && d <= endDate;
+      } catch (e) {
+        console.warn(`[第 ${t['_rowIndex'] || idx + 2} 列] 日期解析失敗：`, e);
+        return false;
+      }
     });
 
     _dashData = filtered;
@@ -119,8 +140,8 @@ async function loadDashboard() {
 
 // ── 計算並渲染指標卡片 ──
 function renderDashboardMetrics(trades) {
-  const totalPnl  = trades.reduce((sum, t) => sum + (Number(t['淨損益']) || 0), 0);
-  const wins      = trades.filter(t => Number(t['淨損益']) > 0).length;
+  const totalPnl  = trades.reduce((sum, t) => sum + (Number(t['浮損益']) || 0), 0);
+  const wins      = trades.filter(t => Number(t['浮損益']) > 0).length;
   const total     = trades.length;
   const winRate   = total > 0 ? (wins / total * 100).toFixed(1) : '0.0';
 
@@ -159,11 +180,11 @@ function renderDailyChart(trades) {
   // 按日期分組
   const dailyMap = {};
   trades.forEach(t => {
-    const date = String(t['日期']).trim();
+    const date = normDate(t['日期']);
     if (!dailyMap[date]) dailyMap[date] = { date, pnl: 0, count: 0, wins: 0 };
-    dailyMap[date].pnl   += Number(t['淨損益']) || 0;
+    dailyMap[date].pnl   += Number(t['浮損益']) || 0;
     dailyMap[date].count += 1;
-    if (Number(t['淨損益']) > 0) dailyMap[date].wins++;
+    if (Number(t['浮損益']) > 0) dailyMap[date].wins++;
   });
 
   const dailyData = Object.values(dailyMap).sort((a, b) => a.date.localeCompare(b.date));
@@ -195,15 +216,15 @@ function renderDailyChart(trades) {
 
 // ── 填充日期選擇下拉 ──
 function populateDateSelect(trades) {
-  const dates  = [...new Set(trades.map(t => String(t['日期']).trim()))].sort().reverse();
+  const dates  = [...new Set(trades.map(t => normDate(t['日期'])))].sort().reverse();
   const select = document.getElementById('analysisDaySelect');
   select.innerHTML = '<option value="">── 選擇交易日期 ──</option>';
   dates.forEach(d => {
     const opt   = document.createElement('option');
     opt.value   = d;
     // 計算當日筆數和損益
-    const dayTrades = trades.filter(t => String(t['日期']).trim() === d);
-    const dayPnl    = dayTrades.reduce((s, t) => s + (Number(t['淨損益']) || 0), 0);
+    const dayTrades = trades.filter(t => normDate(t['日期']) === d);
+    const dayPnl    = dayTrades.reduce((s, t) => s + (Number(t['浮損益']) || 0), 0);
     opt.textContent = `${d}（${dayTrades.length} 筆，${dayPnl >= 0 ? '+' : ''}${dayPnl.toLocaleString()} 元）`;
     select.appendChild(opt);
   });
@@ -223,28 +244,35 @@ async function generateDayAnalysis() {
     return;
   }
 
-  const dayTrades = _dashData.filter(t => String(t['日期']).trim() === date);
+  const dayTrades = _dashData.filter(t => normDate(t['日期']) === date);
   if (dayTrades.length === 0) {
     errEl.textContent  = '⚠️ 該日無交易資料';
     errEl.style.display = 'block';
     return;
   }
 
-  // 轉換為 analyze 格式
-  const trades = dayTrades.map(t => ({
-    date:         String(t['日期']).trim(),
-    stock:        String(t['股票代號'] || '').trim(),
-    direction:    String(t['方向'] || '多').trim(),
-    entry_time:   String(t['進場時間'] || '').trim(),
-    exit_time:    String(t['出場時間'] || '').trim(),
-    entry_price:  Number(t['進場價'])  || 0,
-    exit_price:   Number(t['出場價'])  || 0,
-    shares:       Number(t['張數'])    || 1,
-    gross_pnl:    Number(t['毛損益'])  || 0,
-    tax_fee:      Number(t['手費+稅']) || 0,
-    net_pnl:      Number(t['淨損益'])  || 0,
-    strategy_id:  String(t['策略代號'] || '').trim()
-  }));
+  // 轉換為 analyze 格式（對應試算表欄位：股票名稱、浮損益）
+  const trades = dayTrades.map((t, idx) => {
+    try {
+      return {
+        date:         normDate(t['日期']),
+        stock:        String(t['股票名稱'] || '').trim(),
+        direction:    String(t['方向'] || '多').trim(),
+        entry_time:   '',
+        exit_time:    '',
+        entry_price:  Number(t['進場價'])  || 0,
+        exit_price:   Number(t['出場價'])  || 0,
+        shares:       Number(t['張數'])    || 1,
+        gross_pnl:    Number(t['浮損益'])  || 0,
+        tax_fee:      0,
+        net_pnl:      Number(t['浮損益'])  || 0,
+        strategy_id:  ''
+      };
+    } catch (e) {
+      console.warn(`[generateDayAnalysis 第 ${t['_rowIndex'] || idx + 2} 列] 解析失敗：`, e);
+      return null;
+    }
+  }).filter(Boolean);
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> AI 分析中，請稍候…';
@@ -474,7 +502,8 @@ async function loadFromSheet() {
     if (!data.success) throw new Error(data.error || '讀取失敗');
 
     const allTrades = data.history || [];
-    const trades    = allTrades.filter(t => String(t['日期'] || '').trim() === formattedDate);
+    // 正規化日期後比對，兼容 GAS Date 序列化格式與 yyyy/MM/dd 字串
+    const trades    = allTrades.filter(t => normDate(t['日期']) === formattedDate);
 
     if (trades.length === 0) {
       statusEl.textContent = `😕 ${formattedDate} 無交易紀錄`;
@@ -482,22 +511,28 @@ async function loadFromSheet() {
       return;
     }
 
-    // 清空現有資料並填入
+    // 清空現有資料並填入（欄位對應：股票名稱、浮損益）
     document.getElementById('tradeBody').innerHTML = '';
-    trades.forEach(t => addRow({
-      date:         String(t['日期']).trim(),
-      stock:        String(t['股票代號'] || '').trim(),
-      direction:    String(t['方向'] || '多').trim(),
-      entry_time:   String(t['進場時間'] || '').trim(),
-      exit_time:    String(t['出場時間'] || '').trim(),
-      entry_price:  Number(t['進場價'])  || '',
-      exit_price:   Number(t['出場價'])  || '',
-      shares:       Number(t['張數'])    || 1,
-      gross_pnl:    Number(t['毛損益'])  || '',
-      tax_fee:      Number(t['手費+稅']) || '',
-      net_pnl:      Number(t['淨損益'])  || '',
-      strategy_id:  String(t['策略代號'] || '').trim()
-    }));
+    trades.forEach((t, idx) => {
+      try {
+        addRow({
+          date:         normDate(t['日期']),
+          stock:        String(t['股票名稱'] || '').trim(),
+          direction:    String(t['方向'] || '多').trim(),
+          entry_time:   '',
+          exit_time:    '',
+          entry_price:  Number(t['進場價'])  || '',
+          exit_price:   Number(t['出場價'])  || '',
+          shares:       Number(t['張數'])    || 1,
+          gross_pnl:    Number(t['浮損益'])  || '',
+          tax_fee:      '',
+          net_pnl:      Number(t['浮損益'])  || '',
+          strategy_id:  ''
+        });
+      } catch (e) {
+        console.warn(`[loadFromSheet 第 ${t['_rowIndex'] || idx + 2} 列] 解析失敗：`, e, t);
+      }
+    });
 
     statusEl.textContent = `✅ 已載入 ${trades.length} 筆（${formattedDate}）`;
     statusEl.style.color = 'var(--profit)';
