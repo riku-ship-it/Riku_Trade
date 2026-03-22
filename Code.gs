@@ -244,9 +244,19 @@ function handleGetHistory() {
     if (values.length <= 1) return respond({ success: true, history: [] });
 
     const headers = values[0];
-    const rows    = values.slice(1).map(row => {
+    const tz      = Session.getScriptTimeZone();
+    const rows    = values.slice(1).map((row, rowIdx) => {
       const obj = {};
-      headers.forEach((h, i) => { obj[h] = row[i]; });
+      headers.forEach((h, i) => {
+        const v = row[i];
+        // 將 Date 物件格式化為 yyyy/MM/dd 字串，避免 JSON 序列化成 ISO 格式
+        if (v instanceof Date && !isNaN(v.getTime())) {
+          obj[h] = Utilities.formatDate(v, tz, 'yyyy/MM/dd');
+        } else {
+          obj[h] = v;
+        }
+      });
+      obj['_rowIndex'] = rowIdx + 2; // 對應試算表列號（第1列為標題）
       return obj;
     });
 
