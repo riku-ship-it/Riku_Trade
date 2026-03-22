@@ -12,14 +12,141 @@
 <header class="header">
   <span class="header-logo">📊</span>
   <h1>當沖交易日誌 AI 分析系統</h1>
+  <nav class="tab-nav">
+    <button class="tab-btn active" id="tabBtn-dashboard" onclick="switchTab('dashboard')">📈 儀表板</button>
+    <button class="tab-btn" id="tabBtn-journal" onclick="switchTab('journal')">✏️ 交易明細</button>
+  </nav>
   <span class="header-sub">Powered by Gemini · 資料存入 Google Sheet</span>
 </header>
 
-<!-- ══ 主內容區 ══ -->
-<div class="main">
+<!-- ══ 儀表板分頁 ══ -->
+<div id="tab-dashboard" class="tab-panel">
+  <div class="container">
 
-  <!-- ===== 左側：交易輸入 + 報告 ===== -->
-  <div class="left-col">
+    <!-- 篩選列 -->
+    <div class="card">
+      <div class="card-body">
+        <div class="dashboard-filter">
+          <div class="filter-group">
+            <label class="filter-label">開始日期</label>
+            <input type="date" id="dashStart" class="date-picker" />
+          </div>
+          <div class="filter-sep">至</div>
+          <div class="filter-group">
+            <label class="filter-label">結束日期</label>
+            <input type="date" id="dashEnd" class="date-picker" />
+          </div>
+          <div class="filter-group">
+            <label class="filter-label">月目標（元）</label>
+            <input type="number" id="monthlyTarget" class="date-picker" placeholder="如 50000" style="width:130px" />
+          </div>
+          <button class="btn btn-accent" onclick="loadDashboard()" id="dashLoadBtn">📊 載入數據</button>
+        </div>
+        <div class="dash-status" id="dashStatus"></div>
+      </div>
+    </div>
+
+    <!-- 指標卡片列 -->
+    <div class="metrics-row">
+      <div class="metric-card" id="mPnlCard">
+        <div class="metric-icon">💰</div>
+        <div class="metric-val" id="mPnl">—</div>
+        <div class="metric-lbl">期間總損益</div>
+      </div>
+      <div class="metric-card" id="mWinCard">
+        <div class="metric-icon">🎯</div>
+        <div class="metric-val" id="mWinRate">—</div>
+        <div class="metric-lbl">當沖勝率</div>
+      </div>
+      <div class="metric-card" id="mTargetCard">
+        <div class="metric-icon">📅</div>
+        <div class="metric-val" id="mMonthTarget">—</div>
+        <div class="metric-lbl">月目標達成率</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">📊</div>
+        <div class="metric-val" id="mTrades">—</div>
+        <div class="metric-lbl">總交易筆數</div>
+      </div>
+    </div>
+
+    <!-- 每日損益走勢圖 -->
+    <div class="card" id="chartCard" style="display:none">
+      <div class="card-header">📈 每日損益走勢</div>
+      <div class="card-body" style="padding-bottom:8px">
+        <div class="chart-scroll">
+          <div class="chart-container" id="dailyChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI 分析報告產出 -->
+    <div class="card" id="aiPickCard" style="display:none">
+      <div class="card-header">🤖 產出特定日期的 AI 分析報告</div>
+      <div class="card-body">
+        <div class="analysis-filter">
+          <select id="analysisDaySelect" class="cell-select" style="min-width:180px;height:44px;font-size:14px">
+            <option value="">── 選擇交易日期 ──</option>
+          </select>
+          <button class="btn btn-accent" onclick="generateDayAnalysis()" id="dashAnalyzeBtn">🤖 產出 AI 分析報告</button>
+        </div>
+        <div class="error-banner" id="dashErrorBanner"></div>
+      </div>
+    </div>
+
+    <!-- 儀表板報告輸出區 -->
+    <div id="dashReportArea" style="display:none">
+      <div class="card">
+        <div class="card-header">🧠 AI 分析報告</div>
+        <div class="card-body">
+          <div class="stats-row">
+            <div class="stat-box">
+              <div class="val" id="dRTotal">—</div>
+              <div class="lbl">總交易筆數</div>
+            </div>
+            <div class="stat-box profit">
+              <div class="val" id="dRWin">—</div>
+              <div class="lbl">獲利筆數</div>
+            </div>
+            <div class="stat-box loss">
+              <div class="val" id="dRLoss">—</div>
+              <div class="lbl">虧損筆數</div>
+            </div>
+            <div class="stat-box pnl" id="dRPnlBox">
+              <div class="val" id="dRPnl">—</div>
+              <div class="lbl">當日淨損益</div>
+            </div>
+          </div>
+          <div class="score-section">
+            <div class="score-row">
+              <span class="score-label">😌 情緒穩定</span>
+              <div class="score-bar-wrap"><div class="score-bar" id="dEmotionBar"></div></div>
+              <span class="score-val" id="dEmotionScore">—</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label">📐 策略紀律</span>
+              <div class="score-bar-wrap"><div class="score-bar" id="dDisciplineBar"></div></div>
+              <span class="score-val" id="dDisciplineScore">—</span>
+            </div>
+          </div>
+          <div class="report-grid">
+            <div class="report-box"><div class="rb-title">😌 情緒狀態</div><div class="rb-text" id="dREmotion">—</div></div>
+            <div class="report-box"><div class="rb-title">📐 策略執行紀律</div><div class="rb-text" id="dRDiscipline">—</div></div>
+            <div class="report-box"><div class="rb-title">🔍 行為模式觀察</div><div class="rb-text" id="dRBehavior">—</div></div>
+            <div class="report-box"><div class="rb-title">💡 改善建議</div><div class="rb-text" id="dRImprovement">—</div></div>
+          </div>
+          <div class="card-header" style="border-radius:8px 8px 0 0;margin-bottom:0">📄 完整分析報告</div>
+          <div class="full-report" id="dRFull">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ 交易明細分頁 ══ -->
+<div id="tab-journal" class="tab-panel" style="display:none">
+  <div class="container">
 
     <!-- 交易輸入卡 -->
     <div class="card">
@@ -31,26 +158,24 @@
       </div>
       <div class="card-body">
 
-        <!-- ① 從試算表讀取歷史資料 -->
+        <!-- 從試算表讀取歷史資料 -->
         <div class="load-section">
           <div class="load-section-label">📥 從試算表讀取歷史資料（輸入日期自動帶入）</div>
           <div class="load-row">
             <input type="date" id="loadDate" class="date-picker" />
-            <button class="btn btn-ghost" id="loadBtn" onclick="loadFromSheet()">
-              📂 載入該日交易
-            </button>
+            <button class="btn btn-ghost" id="loadBtn" onclick="loadFromSheet()">📂 載入該日交易</button>
             <span class="load-status" id="loadStatus"></span>
           </div>
         </div>
 
-        <!-- ② 工具列 -->
+        <!-- 工具列 -->
         <div class="trade-toolbar">
           <button class="btn btn-accent" onclick="addRow()">＋ 新增一筆</button>
           <button class="btn btn-ghost" onclick="fillTodayDate()">📅 填今日日期</button>
           <button class="btn btn-danger btn-sm" onclick="clearAllRows()" style="margin-left:auto">🗑 清空</button>
         </div>
 
-        <!-- ③ 交易表格（桌面）→ 手機自動變卡片 -->
+        <!-- 交易表格 -->
         <div class="table-wrap">
           <table id="tradeTable">
             <thead>
@@ -75,31 +200,29 @@
           </table>
         </div>
 
-        <!-- ④ 備註欄 -->
+        <!-- 備註欄 -->
         <div class="notes-wrap">
           <div class="notes-label">📝 今日備註（盤前計畫、盤後心得、特殊市況，AI 會納入分析）</div>
           <textarea class="notes" id="notes" placeholder="選填：今日操作心得、情緒狀態、特殊原因…"></textarea>
         </div>
 
-        <!-- ⑤ 送出按鈕 -->
+        <!-- 送出按鈕 -->
         <div class="submit-wrap">
           <button class="btn-submit" id="submitBtn" onclick="submitTrades()">
             🤖 送出並取得 AI 分析報告
           </button>
         </div>
 
-        <!-- 錯誤訊息 -->
         <div class="error-banner" id="errorBanner"></div>
 
-      </div><!-- /card-body -->
-    </div><!-- /card -->
+      </div>
+    </div>
 
-    <!-- ── AI 分析報告（送出後顯示）── -->
-    <div id="reportArea">
+    <!-- AI 分析報告 -->
+    <div id="reportArea" style="display:none">
       <div class="card">
         <div class="card-header">🧠 AI 分析報告</div>
         <div class="card-body">
-
           <div class="stats-row">
             <div class="stat-box">
               <div class="val" id="rTotal">—</div>
@@ -118,85 +241,65 @@
               <div class="lbl">當日淨損益</div>
             </div>
           </div>
-
           <div class="score-section">
             <div class="score-row">
               <span class="score-label">😌 情緒穩定</span>
-              <div class="score-bar-wrap">
-                <div class="score-bar" id="emotionBar" style="background:var(--profit)"></div>
-              </div>
+              <div class="score-bar-wrap"><div class="score-bar" id="emotionBar" style="background:var(--profit)"></div></div>
               <span class="score-val" id="emotionScore">—</span>
             </div>
             <div class="score-row">
               <span class="score-label">📐 策略紀律</span>
-              <div class="score-bar-wrap">
-                <div class="score-bar" id="disciplineBar" style="background:var(--accent)"></div>
-              </div>
+              <div class="score-bar-wrap"><div class="score-bar" id="disciplineBar" style="background:var(--accent)"></div></div>
               <span class="score-val" id="disciplineScore">—</span>
             </div>
           </div>
-
           <div class="report-grid">
-            <div class="report-box">
-              <div class="rb-title">😌 情緒狀態</div>
-              <div class="rb-text" id="rEmotion">—</div>
-            </div>
-            <div class="report-box">
-              <div class="rb-title">📐 策略執行紀律</div>
-              <div class="rb-text" id="rDiscipline">—</div>
-            </div>
-            <div class="report-box">
-              <div class="rb-title">🔍 行為模式觀察</div>
-              <div class="rb-text" id="rBehavior">—</div>
-            </div>
-            <div class="report-box">
-              <div class="rb-title">💡 改善建議</div>
-              <div class="rb-text" id="rImprovement">—</div>
-            </div>
+            <div class="report-box"><div class="rb-title">😌 情緒狀態</div><div class="rb-text" id="rEmotion">—</div></div>
+            <div class="report-box"><div class="rb-title">📐 策略執行紀律</div><div class="rb-text" id="rDiscipline">—</div></div>
+            <div class="report-box"><div class="rb-title">🔍 行為模式觀察</div><div class="rb-text" id="rBehavior">—</div></div>
+            <div class="report-box"><div class="rb-title">💡 改善建議</div><div class="rb-text" id="rImprovement">—</div></div>
           </div>
-
-          <div class="card-header" style="border-radius:8px 8px 0 0;margin-bottom:0">
-            📄 完整分析報告
-          </div>
+          <div class="card-header" style="border-radius:8px 8px 0 0;margin-bottom:0">📄 完整分析報告</div>
           <div class="full-report" id="rFull">—</div>
-
         </div>
       </div>
-    </div><!-- /reportArea -->
-
-  </div><!-- /left-col -->
-
-  <!-- ===== 右側：AI 對話框 ===== -->
-  <div class="right-col">
-    <div class="card chat-wrap">
-      <div class="card-header">💬 AI 交易顧問對話</div>
-
-      <div class="chat-messages" id="chatMessages">
-        <div class="msg system">歡迎！你可以詢問我任何台股當沖相關問題 🎯</div>
-      </div>
-
-      <div class="chat-hints" id="chatHints">
-        <button class="hint-btn" onclick="sendHint(this)">📉 我今天連續虧損三筆，應該怎麼調整心態？</button>
-        <button class="hint-btn" onclick="sendHint(this)">⏰ 當沖的最佳進出場時段是哪些？</button>
-        <button class="hint-btn" onclick="sendHint(this)">🔒 如何設定合理的停損點避免大虧？</button>
-      </div>
-
-      <div class="chat-input-row">
-        <textarea
-          class="chat-input"
-          id="chatInput"
-          placeholder="輸入問題，按 Enter 送出（Shift+Enter 換行）"
-          rows="1"
-        ></textarea>
-        <button class="btn btn-accent" id="chatSendBtn" onclick="sendChat()"
-                style="height:44px;width:44px;padding:0;align-self:flex-end;flex-shrink:0">
-          ➤
-        </button>
-      </div>
     </div>
-  </div>
 
-</div><!-- /main -->
+  </div>
+</div>
+
+<!-- ══ 浮動 AI 對話按鈕 ══ -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="AI 分析對話">
+  <span id="chatFabIcon">💬</span>
+</button>
+
+<!-- ══ AI 對話面板 ══ -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-panel-header">
+    <span>💬 AI 分析對話</span>
+    <button class="chat-close-btn" onclick="toggleChat()" title="關閉">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="msg system">歡迎！你可以詢問我任何台股當沖相關問題 🎯</div>
+  </div>
+  <div class="chat-hints" id="chatHints">
+    <button class="hint-btn" onclick="sendHint(this)">📉 我今天連續虧損三筆，應該怎麼調整心態？</button>
+    <button class="hint-btn" onclick="sendHint(this)">⏰ 當沖的最佳進出場時段是哪些？</button>
+    <button class="hint-btn" onclick="sendHint(this)">🔒 如何設定合理的停損點避免大虧？</button>
+  </div>
+  <div class="chat-input-row">
+    <textarea
+      class="chat-input"
+      id="chatInput"
+      placeholder="輸入問題，按 Enter 送出（Shift+Enter 換行）"
+      rows="1"
+    ></textarea>
+    <button class="btn btn-accent" id="chatSendBtn" onclick="sendChat()"
+            style="height:44px;width:44px;padding:0;align-self:flex-end;flex-shrink:0">
+      ➤
+    </button>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>

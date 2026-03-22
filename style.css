@@ -29,7 +29,8 @@ body {
 .header {
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
-  padding: 14px 28px;
+  padding: 0 28px;
+  height: 56px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -37,19 +38,43 @@ body {
   top: 0;
   z-index: 100;
 }
-.header-logo { font-size: 22px; }
-.header h1  { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
-.header-sub { font-size: 12px; color: var(--muted); margin-left: auto; }
+.header-logo { font-size: 22px; flex-shrink: 0; }
+.header h1  { font-size: 16px; font-weight: 700; letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; }
+.header-sub { font-size: 12px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+/* ── 分頁導覽 ── */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 20px;
+}
+.tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  min-height: 36px;
+}
+.tab-btn:hover { color: var(--text); border-color: var(--border); }
+.tab-btn.active { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+/* ── 分頁容器 ── */
+.tab-panel { display: block; }
 
 /* ── 主容器 ── */
-.main {
+.container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 20px 48px;
-  display: grid;
-  grid-template-columns: 1fr 380px;
+  padding: 24px 20px 100px;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: start;
 }
 
 /* ── 通用卡片 ── */
@@ -107,6 +132,146 @@ body {
 .btn-submit:hover:not(:disabled) { opacity: .9; }
 .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
 
+/* ── 日期選擇器 ── */
+.date-picker {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 14px;
+  padding: 8px 12px;
+  outline: none;
+  min-height: 44px;
+  cursor: pointer;
+  transition: border-color .15s;
+  color-scheme: dark;
+}
+.date-picker:focus { border-color: var(--accent); }
+
+/* ══════════════════════════════════════
+   儀表板樣式
+   ══════════════════════════════════════ */
+
+/* ── 篩選列 ── */
+.dashboard-filter {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.filter-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: .4px;
+}
+.filter-sep {
+  color: var(--muted);
+  padding-bottom: 10px;
+  font-size: 14px;
+  align-self: flex-end;
+}
+.dash-status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 20px;
+}
+
+/* ── 指標卡片列 ── */
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.metric-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 16px 20px;
+  text-align: center;
+  transition: border-color .3s, transform .2s;
+}
+.metric-card:hover { transform: translateY(-2px); }
+.metric-card.profit { border-color: rgba(63,185,80,.6); }
+.metric-card.loss   { border-color: rgba(248,81,73,.6); }
+.metric-card.warn   { border-color: rgba(210,153,34,.6); }
+.metric-icon { font-size: 28px; margin-bottom: 10px; }
+.metric-val  { font-size: 24px; font-weight: 700; line-height: 1.2; margin-bottom: 6px; }
+.metric-lbl  { font-size: 12px; color: var(--muted); }
+.metric-card.profit .metric-val { color: var(--profit); }
+.metric-card.loss   .metric-val { color: var(--loss); }
+.metric-card.warn   .metric-val { color: var(--warn); }
+
+/* ── 每日損益走勢圖 ── */
+.chart-scroll { overflow-x: auto; padding-bottom: 4px; }
+.chart-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 200px;
+  padding: 8px 4px 0;
+  min-width: max-content;
+}
+.chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 56px;
+  height: 100%;
+  justify-content: flex-end;
+  cursor: default;
+}
+.chart-pnl {
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.chart-pnl.profit { color: var(--profit); }
+.chart-pnl.loss   { color: var(--loss); }
+.chart-bar-wrap {
+  width: 100%;
+  height: 130px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.chart-bar {
+  width: 36px;
+  border-radius: 4px 4px 0 0;
+  min-height: 3px;
+  transition: height .5s ease, opacity .2s;
+  position: relative;
+}
+.chart-bar:hover { opacity: 1 !important; }
+.chart-bar.profit { background: var(--profit); opacity: .75; }
+.chart-bar.loss   { background: var(--loss);   opacity: .75; }
+.chart-date {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* ── AI 分析選擇區 ── */
+.analysis-filter {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ══════════════════════════════════════
+   交易明細 / 表格樣式
+   ══════════════════════════════════════ */
+
 /* ── 從試算表載入區塊 ── */
 .load-section {
   background: var(--bg3);
@@ -131,21 +296,6 @@ body {
   gap: 10px;
   flex-wrap: wrap;
 }
-.date-picker {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-size: 14px;
-  padding: 8px 12px;
-  outline: none;
-  min-height: 44px;
-  cursor: pointer;
-  transition: border-color .15s;
-  /* 修正 Safari/Chrome 日期選擇器深色主題 */
-  color-scheme: dark;
-}
-.date-picker:focus { border-color: var(--accent); }
 .load-status {
   font-size: 13px;
   color: var(--muted);
@@ -153,7 +303,7 @@ body {
   min-width: 120px;
 }
 
-/* ── 交易輸入區 ── */
+/* ── 交易輸入工具列 ── */
 .trade-toolbar {
   display: flex;
   gap: 8px;
@@ -255,8 +405,9 @@ textarea.notes:focus { border-color: var(--accent); }
 /* ── 送出區 ── */
 .submit-wrap { margin-top: 16px; }
 
-/* ── 報告區 ── */
-#reportArea { display: none; margin-top: 20px; }
+/* ══════════════════════════════════════
+   AI 分析報告
+   ══════════════════════════════════════ */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -294,22 +445,114 @@ textarea.notes:focus { border-color: var(--accent); }
   padding: 14px 16px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; word-break: break-word;
 }
 
-/* ── AI 對話框 ── */
-.chat-wrap { position: sticky; top: 70px; }
+/* ══════════════════════════════════════
+   浮動 AI 對話
+   ══════════════════════════════════════ */
+
+/* ── 浮動按鈕 ── */
+.chat-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent2), #0d419d);
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5), 0 0 0 0 rgba(31,111,235,.4);
+  z-index: 999;
+  transition: transform .2s, box-shadow .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(0,0,0,.6), 0 0 0 6px rgba(31,111,235,.15);
+}
+.chat-fab.active {
+  background: var(--bg3);
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+
+/* ── 對話面板 ── */
+.chat-panel {
+  position: fixed;
+  bottom: 100px;
+  right: 28px;
+  width: 390px;
+  max-height: 560px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.6);
+  z-index: 998;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(.9) translateY(24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+  transform-origin: bottom right;
+}
+.chat-panel.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+.chat-panel-header {
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.chat-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 3px 7px;
+  border-radius: 5px;
+  transition: color .15s, background .15s;
+  line-height: 1;
+}
+.chat-close-btn:hover { color: var(--text); background: var(--border); }
+
+/* ── 對話訊息 ── */
 .chat-messages {
-  height: 420px; overflow-y: auto; padding: 14px;
-  display: flex; flex-direction: column; gap: 10px; background: var(--bg);
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--bg);
+  min-height: 0;
 }
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-.msg { max-width: 85%; padding: 10px 13px; border-radius: 12px; font-size: 14px; line-height: 1.65; word-break: break-word; white-space: pre-wrap; }
+.msg { max-width: 85%; padding: 10px 13px; border-radius: 12px; font-size: 13px; line-height: 1.65; word-break: break-word; white-space: pre-wrap; }
 .msg.user   { background: var(--accent2); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
 .msg.ai     { background: var(--bg3); border: 1px solid var(--border); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
 .msg.system { background: transparent; color: var(--muted); font-size: 12px; align-self: center; text-align: center; font-style: italic; }
-.chat-hints { display: flex; flex-direction: column; gap: 6px; padding: 0 14px 10px; }
-.hint-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--muted); font-size: 13px; text-align: left; cursor: pointer; transition: border-color .15s, color .15s; min-height: 44px; }
+
+/* ── 快捷提示 ── */
+.chat-hints { display: flex; flex-direction: column; gap: 6px; padding: 0 14px 10px; flex-shrink: 0; }
+.hint-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--muted); font-size: 12px; text-align: left; cursor: pointer; transition: border-color .15s, color .15s; min-height: 38px; }
 .hint-btn:hover { border-color: var(--accent); color: var(--text); }
-.chat-input-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border); background: var(--bg2); }
+
+/* ── 輸入列 ── */
+.chat-input-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
 .chat-input {
   flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
   color: var(--text); font-size: 14px; padding: 8px 12px; outline: none;
@@ -335,16 +578,30 @@ textarea.notes:focus { border-color: var(--accent); }
 @media (max-width: 768px) {
 
   /* 頁首 */
-  .header { padding: 12px 16px; }
-  .header h1  { font-size: 15px; }
+  .header { padding: 0 12px; gap: 8px; }
+  .header h1  { font-size: 14px; }
   .header-sub { display: none; }
+  .tab-nav { margin-left: 8px; }
+  .tab-btn { padding: 5px 10px; font-size: 12px; }
 
-  /* 主容器：單欄 */
-  .main { grid-template-columns: 1fr; padding: 12px 12px 48px; gap: 14px; }
+  /* 主容器 */
+  .container { padding: 12px 12px 100px; gap: 14px; }
 
-  /* card padding 縮減 */
+  /* 卡片 */
   .card-body { padding: 14px 12px; }
   .card-header { padding: 10px 14px; font-size: 13px; }
+
+  /* 篩選列 */
+  .dashboard-filter { gap: 10px; }
+  .dashboard-filter .btn { width: 100%; }
+
+  /* 指標 2欄 */
+  .metrics-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .metric-val  { font-size: 20px; }
+
+  /* 圖表欄位縮小 */
+  .chart-col { flex: 0 0 44px; }
+  .chart-bar { width: 28px; }
 
   /* 工具列按鈕 */
   .trade-toolbar .btn { flex: 1; min-height: 48px; font-size: 14px; }
@@ -360,7 +617,6 @@ textarea.notes:focus { border-color: var(--accent); }
   table       { min-width: unset; width: 100%; }
   thead       { display: none; }
 
-  /* 每筆交易 = 一張卡 */
   tbody tr {
     display: block;
     background: var(--bg3);
@@ -372,7 +628,6 @@ textarea.notes:focus { border-color: var(--accent); }
   }
   tbody tr:hover { background: var(--bg3); }
 
-  /* 每個欄位：label + 輸入框（水平排列） */
   tbody td {
     display: flex;
     align-items: center;
@@ -386,7 +641,6 @@ textarea.notes:focus { border-color: var(--accent); }
   }
   tbody td:last-child { border-bottom: none; padding-bottom: 4px; }
 
-  /* label（由 data-label 取得） */
   tbody td::before {
     content: attr(data-label);
     min-width: 68px;
@@ -397,18 +651,16 @@ textarea.notes:focus { border-color: var(--accent); }
     flex-shrink: 0;
   }
 
-  /* 序號欄 */
   tbody td.td-idx {
     border-bottom: 1px solid var(--border);
     color: var(--muted);
     font-weight: 700;
     font-size: 13px;
-    padding-right: 44px; /* 留給刪除按鈕 */
+    padding-right: 44px;
     min-height: 36px;
   }
   tbody td.td-idx::before { content: none; }
 
-  /* 刪除按鈕：絕對定位右上角 */
   tbody td.td-del {
     position: absolute;
     top: 6px;
@@ -420,7 +672,6 @@ textarea.notes:focus { border-color: var(--accent); }
   }
   tbody td.td-del::before { content: none; }
 
-  /* 輸入框 */
   tbody td .cell-input  { width: 100% !important; font-size: 14px; min-height: 36px; padding: 6px 8px; }
   tbody td .cell-select { font-size: 14px; min-height: 36px; padding: 6px 8px; }
   tbody td .cell-auto   { font-size: 14px; min-width: unset; text-align: left; }
@@ -428,22 +679,25 @@ textarea.notes:focus { border-color: var(--accent); }
   /* 報告統計 2 欄 */
   .stats-row { grid-template-columns: 1fr 1fr; }
   .stat-box .val { font-size: 18px; }
-
-  /* 評分條 label */
   .score-label { width: 72px; font-size: 11px; }
-
-  /* 報告 grid 單欄 */
   .report-grid { grid-template-columns: 1fr; }
 
-  /* chat 不 sticky，高度縮短 */
-  .chat-wrap { position: static; }
-  .chat-messages { height: 280px; }
-  .msg { font-size: 14px; }
+  /* 浮動聊天 */
+  .chat-fab { bottom: 20px; right: 16px; width: 52px; height: 52px; font-size: 20px; }
+  .chat-panel {
+    bottom: 86px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-height: 70vh;
+    border-radius: 14px;
+  }
 }
 
 /* ── 超小螢幕（400px） ── */
 @media (max-width: 400px) {
-  .header h1  { font-size: 14px; }
-  .main       { padding: 8px 8px 40px; }
+  .header h1  { font-size: 13px; }
+  .container  { padding: 8px 8px 100px; }
   tbody td::before { min-width: 58px; }
+  .metrics-row { grid-template-columns: 1fr 1fr; }
 }
